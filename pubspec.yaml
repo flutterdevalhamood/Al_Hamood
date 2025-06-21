@@ -117,6 +117,39 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
+    color: "#1A1A2E"
+
+    # Your logo image
+    image: assets/images/logo.png
+
+    # Dark mode colors (optional)
+    color_dark: "#0F3460"
+    image_dark: assets/images/logo.png
+
+    # Android 12+ specific configuration
+    android_12:
+      image: assets/images/logo.png
+      # Use your primary theme color for Android 12
+      icon_background_color: "#1A1A2E"
+      color: "#1A1A2E"
+
+      # Dark mode for Android 12
+      image_dark: assets/images/logo.png
+      icon_background_color_dark: "#0F3460"
+      color_dark: "#0F3460"
+
+    # Platform specific colors
+    color_android: "#1A1A2E"
+    color_dark_android: "#0F3460"
+    color_ios: "#1A1A2E"
+    color_dark_ios: "#0F3460"
+
+    # Make it fullscreen for better experience
+    fullscreen: true
+
+    # Image positioning
+    android_gravity: center
+    ios_content_mode: center
     # This package generates native code to customize Flutter's default white native splash screen
     # with background color and splash image.
     # Customize the parameters below, and run the following command in the terminal:
@@ -132,7 +165,7 @@ flutter_native_splash:
     # of your splash screen to a solid color.  Use background_image to set the background of your
     # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
     # size of the app. Only one parameter can be used, color and background_image cannot both be set.
-    color: "#1A1A2E"
+#    color: "#1A1A2E"
 
 #    background_image: "assets/background.png"
 
@@ -141,7 +174,7 @@ flutter_native_splash:
 
     # The image parameter allows you to specify an image used in the splash screen.  It must be a
     # png file and should be sized for 4x pixel density.
-    image: assets/images/logo.png
+#    image: assets/images/logo.png
 
 
     # The branding property allows you to specify an image used as branding in the splash screen.
@@ -170,9 +203,9 @@ flutter_native_splash:
     # From Android 12 onwards, the splash screen is handled differently than in previous versions.
     # Please visit https://developer.android.com/guide/topics/ui/splash-screen
     # Following are specific parameters for Android 12+.
-    android_12:
-        image: assets/images/logo.png
-        icon_background_color: "#42a5f5"
+#    android_12:
+#        image: assets/images/logo.png
+#        icon_background_color: "#42a5f5"
     # The image parameter sets the splash screen icon image.  If this parameter is not specified,
     # the app's launcher icon will be used instead.
     # Please note that the splash screen will be clipped to a circle on the center of the screen.
@@ -208,7 +241,7 @@ flutter_native_splash:
 
     # Platform specific images can be specified with the following parameters, which will override
     # the respective parameter.  You may specify all, selected, or none of these parameters:
-    color_android: "#42a5f5"
+#    color_android: "#42a5f5"
     #color_dark_android: "#042a49"
     #color_ios: "#42a5f5"
     #color_dark_ios: "#042a49"

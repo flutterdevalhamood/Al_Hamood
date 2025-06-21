@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/models/vehicle_tyre_response_model.dart';
 import 'package:sample/src/providers/tyre_replacement_controller.dart';
+import 'package:sample/src/screens/tyreReplacement/tyre_replacement_bottom_sheet.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
 
@@ -152,7 +153,7 @@ class _TyreReplacementListScreenState extends State<TyreReplacementListScreen> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
-          'Tyre Replacements',
+          'Tyre Replacement List',
           style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
         ),
         backgroundColor: darkBlue,
@@ -396,10 +397,7 @@ class _TyreReplacementListScreenState extends State<TyreReplacementListScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
-          // Navigate to detail screen
-          // Navigator.push(context, MaterialPageRoute(
-          //   builder: (context) => TyreReplacementDetailScreen(item: item)
-          // ));
+          context.showTyreReplacementDetail(tyreData.id);
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
