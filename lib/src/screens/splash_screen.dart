@@ -96,8 +96,8 @@ class _SplashScreenState extends State<SplashScreen>
                   return Transform.scale(
                     scale: _scaleAnimation.value,
                     child: Container(
-                      width: 280,
-                      height: 280,
+                      width: 200,
+                      height: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [

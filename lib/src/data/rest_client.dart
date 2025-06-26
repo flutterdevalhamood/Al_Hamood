@@ -55,7 +55,7 @@ abstract class RestClient {
     @Part(name: "current_odometer") String? currentOdometer,
     @Part(name: "reason_for_change") String? reasonForChange,
     @Part(name: "changed_by") String? changedBy,
-    @Part(name: 'document[]') List<MultipartFile>? files,
+    @Part(name: 'odometer_image') List<MultipartFile>? files,
   });
 
   @GET('/api/getTyreReplacementBaseList')
@@ -74,5 +74,18 @@ abstract class RestClient {
     @Header("Authorization") String? token,
     @Field("id") int? id,
     @Field("deleteDescription") String? description,
+  });
+
+  @POST('/api/TyreReplacementPictureUpload')
+  Future<dynamic> postTyreReplacementPictureUpload({
+    @Header("Authorization") String? token,
+    @Part(name: "id") int? id,
+    @Part(name: 'document[]') List<MultipartFile>? files,
+  });
+
+  @POST('/api/TyreReplacementPictureDeleteByID')
+  Future<dynamic> deleteTyreReplacementPictureDelete({
+    @Header("Authorization") String? token,
+    @Field("id") int? id,
   });
 }

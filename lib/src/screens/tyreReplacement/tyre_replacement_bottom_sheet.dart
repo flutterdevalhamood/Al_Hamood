@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/providers/tyre_replacement_controller.dart';
+import 'package:sample/src/widgets/document_image_delete.dart';
 
 class TyreReplacementDetailBottomSheet extends StatefulWidget {
   final int tyreId;
@@ -325,61 +326,36 @@ class _TyreReplacementDetailBottomSheetState
           const SizedBox(height: 16),
 
           // Documents Section
-          if (data['tyre_replacement_documents'] != null)
+          // Updated Documents Section to handle multiple images
+          if (data['tyre_replacement_documents'] != null &&
+              (data['tyre_replacement_documents'] as List).isNotEmpty)
             _buildInfoCard(
-              title: 'Documents',
-              icon: Icons.folder,
+              title:
+                  'Replacement Documents (${(data['tyre_replacement_documents'] as List).length})',
+              icon: Icons.photo_library,
               children: [
-                if ((data['tyre_replacement_documents'] as List).isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.grey[400]),
-                        const SizedBox(width: 8),
-                        Text(
-                          'No documents available',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  ...((data['tyre_replacement_documents'] as List)
-                      .map(
-                        (doc) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue[200]!),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.description, color: Colors.blue[600]),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  doc.toString(),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.blue[800],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList()),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount:
+                      (data['tyre_replacement_documents'] as List).length,
+                  itemBuilder: (context, index) {
+                    final doc = data['tyre_replacement_documents'][index];
+                    return DocumentImageWithDelete(
+                      imageUrl: doc['Title'].toString(),
+                      documentId: doc['id'],
+                      controller: controller,
+                    );
+                  },
+                ),
               ],
             ),
-
           const SizedBox(height: 24),
         ],
       ),

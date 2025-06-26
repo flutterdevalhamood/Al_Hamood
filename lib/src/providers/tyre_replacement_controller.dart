@@ -14,6 +14,7 @@ class TyreReplacementController with ChangeNotifier {
   String? errorMessage;
   int? id;
   List<Map<String, dynamic>>? tyreData;
+  List<Map<String, dynamic>>? tyreOriginalData;
   List<Map<String, dynamic>>? tyreVersion;
   List<Map<String, dynamic>>? supplierData;
   List<Map<String, dynamic>>? companyVehicleData;
@@ -26,7 +27,7 @@ class TyreReplacementController with ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   int get filteredCount => tyreReplacementData?.length ?? 0;
-  int get totalCount => _originalData?.length ?? 0;
+  int get totalCount => tyreOriginalData?.length ?? 0;
   bool get isFiltered => _searchQuery.isNotEmpty;
 
   int? selectedVehicleId;
@@ -36,6 +37,8 @@ class TyreReplacementController with ChangeNotifier {
 
   bool _isLoadingTyreVersions = false;
   bool get isLoadingTyreVersions => _isLoadingTyreVersions;
+
+  int? lastCreatedTyreReplacementId;
 
   void setVehicleType(int? vehicleTypeId) {
     selectedVehicleId = vehicleTypeId;
@@ -106,12 +109,12 @@ class TyreReplacementController with ChangeNotifier {
                 data.map((v) => v as Map<String, dynamic>).toList();
 
             if (loadMore) {
-              _originalData ??= [];
-              _originalData!.addAll(newTyreReplacementData);
+              tyreOriginalData ??= [];
+              tyreOriginalData!.addAll(newTyreReplacementData);
               tyreReplacementData ??= [];
               tyreReplacementData!.addAll(newTyreReplacementData);
             } else {
-              _originalData = List.from(newTyreReplacementData);
+              tyreOriginalData = List.from(newTyreReplacementData);
               tyreReplacementData = List.from(newTyreReplacementData);
               currentPage = 1; // Reset page on fresh load
             }
@@ -126,7 +129,7 @@ class TyreReplacementController with ChangeNotifier {
             hasMore = false;
             if (!loadMore) {
               tyreReplacementData = [];
-              _originalData = [];
+              tyreOriginalData = [];
             }
           }
         } else {
@@ -159,14 +162,14 @@ class TyreReplacementController with ChangeNotifier {
   }
 
   void _applySearchFilter() {
-    if (_originalData == null) return;
+    if (tyreOriginalData == null) return;
 
     if (_searchQuery.isEmpty) {
-      tyreReplacementData = List.from(_originalData!);
+      tyreReplacementData = List.from(tyreOriginalData!);
     } else {
       final query = _searchQuery.toLowerCase();
       tyreReplacementData =
-          _originalData!.where((item) {
+          tyreOriginalData!.where((item) {
             final plateNo =
                 item['company_vehicle']?['PlateNo1']
                     ?.toString()
@@ -180,8 +183,8 @@ class TyreReplacementController with ChangeNotifier {
 
   void clearSearch() {
     _searchQuery = '';
-    if (_originalData != null) {
-      tyreReplacementData = List.from(_originalData!);
+    if (tyreOriginalData != null) {
+      tyreReplacementData = List.from(tyreOriginalData!);
     }
     notifyListeners();
   }
@@ -198,7 +201,7 @@ class TyreReplacementController with ChangeNotifier {
     selectedTyreCodeId = null;
     selectedSupplierId = null;
     tyreReplacementData = null;
-    _originalData = null;
+    tyreOriginalData = null;
     currentPage = 1;
     hasMore = true;
     errorMessage = null;
@@ -285,7 +288,7 @@ class TyreReplacementController with ChangeNotifier {
     String? currentOdometer,
     String? reasonForChange,
     String? changedBy,
-    List<MultipartFile>? odoMeterImages,
+    List<MultipartFile>? odometerImages,
   }) async {
     if (!await _checkToken()) return false;
 
@@ -300,12 +303,13 @@ class TyreReplacementController with ChangeNotifier {
         currentOdometer: currentOdometer,
         reasonForChange: reasonForChange,
         changedBy: changedBy,
-        files: odoMeterImages,
+        files: odometerImages,
       );
 
       // Check response
       if (response is Map<String, dynamic> && response['IsSuccess'] == true) {
-        debugPrint("Tyre replacement posted successfully!");
+        // lastCreatedTyreReplacementId =
+        //     response['Data']?['Id'] ?? response['Id'];
         getTyreReplacementData();
         NavigationService().pushNavigation(
           Screenroutes.tyreReplacementListScreen,
@@ -389,6 +393,57 @@ class TyreReplacementController with ChangeNotifier {
       await getTyreReplacementData();
     } catch (e) {
       _handleApiError(e);
+    }
+  }
+
+  Future<bool> postTyreReplacementPictureUpload({
+    int? id,
+    List<MultipartFile>? files,
+  }) async {
+    try {
+      final postTyreReplacementPictureUploadData = await restApi
+          .postTyreReplacementPictureUpload(
+            token: _getAuthHeader(),
+            id: id,
+            files: files,
+          );
+
+      if (postTyreReplacementPictureUploadData['IsSuccess'] == true) {
+        getTyreReplacementData();
+        return true;
+      } else {
+        print(
+          'API call failed: ${postTyreReplacementPictureUploadData['Message']}',
+        );
+        return false;
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print("Dio Exception $e");
+      }
+      return false;
+    }
+  }
+
+  Future<bool> postTyreReplacementPictureDelete({int? id}) async {
+    try {
+      final postTyreReplacementPictureDelete = await restApi
+          .deleteTyreReplacementPictureDelete(token: _getAuthHeader(), id: id);
+
+      if (postTyreReplacementPictureDelete['IsSuccess'] == true) {
+        getTyreReplacementDetail();
+        return true;
+      } else {
+        print(
+          'API call failed: ${postTyreReplacementPictureDelete['Message']}',
+        );
+        return false;
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print("Dio Exception $e");
+      }
+      return false;
     }
   }
 

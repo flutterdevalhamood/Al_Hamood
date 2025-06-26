@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/providers/tyre_replacement_controller.dart';
 import 'package:sample/src/util/app_colors.dart';
+import 'package:sample/src/util/app_navigation.dart';
+import 'package:sample/src/util/app_routes.dart';
 import 'package:sample/src/util/snack.dart';
 
 class TyreReplacementScreen extends StatefulWidget {
@@ -142,13 +144,14 @@ class _TyreReplacementScreenState extends State<TyreReplacementScreen> {
     });
 
     try {
-      List<MultipartFile> multipartFiles = [];
-      for (XFile image in _odometerImages) {
-        String fileName = image.path.split('/').last;
-        multipartFiles.add(
-          await MultipartFile.fromFile(image.path, filename: fileName),
-        );
-      }
+      final List<MultipartFile> odometerImage = await Future.wait(
+        _odometerImages.map((image) async {
+          return await MultipartFile.fromFile(
+            image.path,
+            filename: image.path.split('/').last,
+          );
+        }),
+      );
 
       bool success = await _tyreReplacementController.postTyreReplacement(
         companyVehicleId: _tyreReplacementController.selectedVehicleId,
@@ -160,11 +163,16 @@ class _TyreReplacementScreenState extends State<TyreReplacementScreen> {
         currentOdometer: _currentOdometerController.text.trim(),
         reasonForChange: _reasonForChangeController.text.trim(),
         changedBy: _changedByController.text.trim(),
-        odoMeterImages: multipartFiles,
+        odometerImages: odometerImage,
       );
 
       if (success) {
         showSuccessSnack('Tyre replacement data saved successfully!');
+        if (mounted) {
+          NavigationService().pushNavigation(
+            Screenroutes.tyreReplacementPictureUploadScreen,
+          );
+        }
         _resetForm();
       } else {
         showErrorSnack(
