@@ -88,4 +88,65 @@ abstract class RestClient {
     @Header("Authorization") String? token,
     @Field("id") int? id,
   });
+
+  @GET('/api/SwapTyre/paginate/{page}/{limit}')
+  Future<dynamic> getSwapTyre(
+    @Path("page") int page,
+    @Path("limit") int limit,
+    @Header("Authorization") String? token,
+  );
+
+  @GET('/api/SwapTyreDetail/{id}')
+  Future<dynamic> getSwapTyreDetail({
+    @Path("id") int? id,
+    @Header("Authorization") String? token,
+  });
+
+  @POST('/api/SwapTyre')
+  Future<dynamic> postSwapTyre({
+    @Header("Authorization") String? token,
+    @Part(name: "from_company_vehicle_id") int? fromCompanyVehicleId,
+    @Part(name: "from_vehicle_tyre_code_id") int? fromVehicleTyreCodeId,
+    @Part(name: "from_tyre_depth_mm") String? fromTyreDepthMm,
+    @Part(name: "from_tyre_condition") String? fromTyreCondition,
+    @Part(name: "from_vehicle_odometer")
+    List<MultipartFile>? fromVehicleOdometerImage,
+    @Part(name: "to_company_vehicle_id") int? toCompanyVehicleId,
+    @Part(name: "to_vehicle_tyre_code_id") int? toVehicleTyreCodeId,
+    @Part(name: "to_tyre_depth_mm") List<MultipartFile>? toTyreDepthMmImage,
+    @Part(name: 'to_tyre_condition') String? toTyreCondition,
+    @Part(name: 'to_vehicle_odometer') String? toVehicleOdometer,
+    @Part(name: 'tyre_change_date') String? tyreChangeDate,
+    @Part(name: 'reason_for_change') String? reasonForChange,
+    @Part(name: 'changed_by') String? changedBy,
+  });
+
+  @GET('/api/getSwapTyreBaseList')
+  Future<dynamic> getSwapTyreBaseList({@Header("Authorization") String? token});
+
+  @GET('/api/getTyreCodesOfVersion/{id}')
+  Future<dynamic> getSwapTyreCodeOfVersion({
+    @Path("id") int? id,
+    @Header("Authorization") String? token,
+  });
+
+  @POST('/api/SwapTyreDelete')
+  Future<dynamic> deleteSwapTyreData({
+    @Header("Authorization") String? token,
+    @Field("id") int? id,
+    @Field("deleteDescription") String? description,
+  });
+
+  @POST('/api/SwapTyrePictureUpload')
+  Future<dynamic> postSwapTyrePictureUpload({
+    @Header("Authorization") String? token,
+    @Part(name: "id") int? id,
+    @Part(name: 'document[]') List<MultipartFile>? files,
+  });
+
+  @POST('/api/SwapTyrePictureDeleteByID')
+  Future<dynamic> deleteSwapTyrePictureDelete({
+    @Header("Authorization") String? token,
+    @Field("id") int? id,
+  });
 }

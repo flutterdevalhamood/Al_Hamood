@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sample/src/screens/change_password_screen.dart';
+import 'package:sample/src/screens/swapTyre/swap_tyre_data_screen.dart';
+import 'package:sample/src/screens/swapTyre/swap_tyre_list_screen.dart';
+import 'package:sample/src/screens/swapTyre/swap_tyre_picture_upload_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_data_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_list_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_picture_upload_screen.dart';
@@ -25,6 +28,13 @@ class Screenroutes {
       "tyreReplacementDetailScreen";
   static const String tyreReplacementPictureUploadScreen =
       "tyreReplacementPictureUploadScreen";
+
+  //swap tyre
+  static const String swapTyreListScreen = "swapTyreListScreen";
+  static const String swapTyreDataScreen = "swapTyreDataScreen";
+  static const String swapTyreDetailScreen = "swapTyreDetailScreen";
+  static const String swapTyrePictureUploadScreen =
+      "swapTyrePictureUploadScreen";
 
   static Route<dynamic>? routes(RouteSettings settings) {
     StringConstants.currentRoute = settings.name ?? "";
@@ -87,6 +97,31 @@ class Screenroutes {
           ),
           builder: (BuildContext context) {
             return TyreReplacementPictureUploadScreen();
+          },
+        );
+
+      case Screenroutes.swapTyreListScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.swapTyreListScreen),
+          builder: (BuildContext context) {
+            return SwapTyreListScreen();
+          },
+        );
+      case Screenroutes.swapTyreDataScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.swapTyreDataScreen),
+          builder: (BuildContext context) {
+            return SwapTyreDataScreen();
+          },
+        );
+
+      case Screenroutes.swapTyrePictureUploadScreen:
+        return MaterialPageRoute(
+          settings: RouteSettings(
+            name: Screenroutes.swapTyrePictureUploadScreen,
+          ),
+          builder: (BuildContext context) {
+            return SwapTyrePictureUploadScreen();
           },
         );
     }

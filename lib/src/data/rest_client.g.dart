@@ -345,6 +345,274 @@ class _RestClient implements RestClient {
     return _value;
   }
 
+  @override
+  Future<dynamic> getSwapTyre(int page, int limit, String? token) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyre/paginate/${page}/${limit}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> getSwapTyreDetail({int? id, String? token}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyreDetail/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> postSwapTyre({
+    String? token,
+    int? fromCompanyVehicleId,
+    int? fromVehicleTyreCodeId,
+    String? fromTyreDepthMm,
+    String? fromTyreCondition,
+    List<MultipartFile>? fromVehicleOdometerImage,
+    int? toCompanyVehicleId,
+    int? toVehicleTyreCodeId,
+    List<MultipartFile>? toTyreDepthMmImage,
+    String? toTyreCondition,
+    String? toVehicleOdometer,
+    String? tyreChangeDate,
+    String? reasonForChange,
+    String? changedBy,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = FormData();
+    if (fromCompanyVehicleId != null) {
+      _data.fields.add(
+        MapEntry('from_company_vehicle_id', fromCompanyVehicleId.toString()),
+      );
+    }
+    if (fromVehicleTyreCodeId != null) {
+      _data.fields.add(
+        MapEntry('from_vehicle_tyre_code_id', fromVehicleTyreCodeId.toString()),
+      );
+    }
+    if (fromTyreDepthMm != null) {
+      _data.fields.add(MapEntry('from_tyre_depth_mm', fromTyreDepthMm));
+    }
+    if (fromTyreCondition != null) {
+      _data.fields.add(MapEntry('from_tyre_condition', fromTyreCondition));
+    }
+    if (fromVehicleOdometerImage != null) {
+      _data.files.addAll(
+        fromVehicleOdometerImage.map(
+          (i) => MapEntry('from_vehicle_odometer', i),
+        ),
+      );
+    }
+    if (toCompanyVehicleId != null) {
+      _data.fields.add(
+        MapEntry('to_company_vehicle_id', toCompanyVehicleId.toString()),
+      );
+    }
+    if (toVehicleTyreCodeId != null) {
+      _data.fields.add(
+        MapEntry('to_vehicle_tyre_code_id', toVehicleTyreCodeId.toString()),
+      );
+    }
+    if (toTyreDepthMmImage != null) {
+      _data.files.addAll(
+        toTyreDepthMmImage.map((i) => MapEntry('to_tyre_depth_mm', i)),
+      );
+    }
+    if (toTyreCondition != null) {
+      _data.fields.add(MapEntry('to_tyre_condition', toTyreCondition));
+    }
+    if (toVehicleOdometer != null) {
+      _data.fields.add(MapEntry('to_vehicle_odometer', toVehicleOdometer));
+    }
+    if (tyreChangeDate != null) {
+      _data.fields.add(MapEntry('tyre_change_date', tyreChangeDate));
+    }
+    if (reasonForChange != null) {
+      _data.fields.add(MapEntry('reason_for_change', reasonForChange));
+    }
+    if (changedBy != null) {
+      _data.fields.add(MapEntry('changed_by', changedBy));
+    }
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyre',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> getSwapTyreBaseList({String? token}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/getSwapTyreBaseList',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> getSwapTyreCodeOfVersion({int? id, String? token}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/getTyreCodesOfVersion/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> deleteSwapTyreData({
+    String? token,
+    int? id,
+    String? description,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = {'id': id, 'deleteDescription': description};
+    _data.removeWhere((k, v) => v == null);
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyreDelete',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> postSwapTyrePictureUpload({
+    String? token,
+    int? id,
+    List<MultipartFile>? files,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = FormData();
+    if (id != null) {
+      _data.fields.add(MapEntry('id', id.toString()));
+    }
+    if (files != null) {
+      _data.files.addAll(files.map((i) => MapEntry('document[]', i)));
+    }
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyrePictureUpload',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<dynamic> deleteSwapTyrePictureDelete({String? token, int? id}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = {'id': id};
+    _data.removeWhere((k, v) => v == null);
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/SwapTyrePictureDeleteByID',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||
