@@ -36,6 +36,17 @@ class SwapTyreController with ChangeNotifier {
   bool _isLoadingTyreVersions = false;
   bool get isLoadingTyreVersions => _isLoadingTyreVersions;
 
+  int? _swapTyreId;
+
+  int? get swapTyreId => _swapTyreId;
+
+  void setSwapTyreId(int id) {
+    _swapTyreId = id;
+    // Clear previous detail data when setting new ID
+    swapTyreData = null;
+    errorMessage = null;
+  }
+
   void setVehicleType(int? vehicleTypeId) {
     selectedVehicleId = vehicleTypeId;
     notifyListeners();
@@ -208,17 +219,19 @@ class SwapTyreController with ChangeNotifier {
   Future<void> getSwapTyreDetail() async {
     if (!await _checkToken()) return;
 
+    if (_swapTyreId == null) {
+      errorMessage = "Swap Tyre ID is required";
+      notifyListeners();
+      return;
+    }
+
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      if (id == null) {
-        throw Exception("Customer ID is required");
-      }
-
       final tyreSwapTyreDetailData = await restApi.getSwapTyreDetail(
-        id: id,
+        id: _swapTyreId,
         token: _getAuthHeader(),
       );
 
@@ -238,6 +251,13 @@ class SwapTyreController with ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  void clearDetailData() {
+    _swapTyreId = null;
+    swapTyreData = null;
+    errorMessage = null;
+    notifyListeners();
   }
 
   Future<void> getSwapTyreBaseData() async {
@@ -272,17 +292,19 @@ class SwapTyreController with ChangeNotifier {
     }
   }
 
-  Future<bool> postTyreReplacement({
+  Future<bool> postSwapTyre({
     int? fromCompanyVehicleId,
     int? fromVehicleTyreCodeId,
     String? fromTyreDepthMm,
     String? fromTyreCondition,
-    List<MultipartFile>? fromVehicleOdometerImage,
+    String? fromVehicleOdometer, //add
+    List<MultipartFile>? fromVehicleOdometerImage, //add
     int? toCompanyVehicleId,
     int? toVehicleTyreCodeId,
-    List<MultipartFile>? toTyreDepthMmImage,
+    String? toTyreDepthMm, //add
     String? toTyreCondition,
     String? toVehicleOdometer,
+    List<MultipartFile>? toVehicleOdometerImage, //add
     String? tyreChangeDate,
     String? reasonForChange,
     String? changedBy,
@@ -296,12 +318,14 @@ class SwapTyreController with ChangeNotifier {
         fromVehicleTyreCodeId: fromVehicleTyreCodeId,
         fromTyreDepthMm: fromTyreDepthMm,
         fromTyreCondition: fromTyreCondition,
+        fromVehicleOdometer: fromVehicleOdometer,
         fromVehicleOdometerImage: fromVehicleOdometerImage,
         toCompanyVehicleId: toCompanyVehicleId,
         toVehicleTyreCodeId: toVehicleTyreCodeId,
-        toTyreDepthMmImage: toTyreDepthMmImage,
+        toTyreDepthMm: toTyreDepthMm,
         toTyreCondition: toTyreCondition,
         toVehicleOdometer: toVehicleOdometer,
+        toVehicleOdometerImage: toVehicleOdometerImage,
         tyreChangeDate: tyreChangeDate,
         reasonForChange: reasonForChange,
         changedBy: changedBy,

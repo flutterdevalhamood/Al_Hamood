@@ -346,6 +346,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   },
                 ),
 
+                _buildMenuItem(
+                  context: context,
+                  icon: Icons.tire_repair,
+                  title: 'Swap Tyre',
+                  onTap: () {
+                    NavigationService().pushNavigation(
+                      Screenroutes.swapTyreListScreen,
+                    );
+                  },
+                ),
+
                 // Spacer to push logout to bottom
                 SizedBox(height: 40),
 

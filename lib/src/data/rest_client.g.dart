@@ -398,12 +398,14 @@ class _RestClient implements RestClient {
     int? fromVehicleTyreCodeId,
     String? fromTyreDepthMm,
     String? fromTyreCondition,
+    String? fromVehicleOdometer,
     List<MultipartFile>? fromVehicleOdometerImage,
     int? toCompanyVehicleId,
     int? toVehicleTyreCodeId,
-    List<MultipartFile>? toTyreDepthMmImage,
+    String? toTyreDepthMm,
     String? toTyreCondition,
     String? toVehicleOdometer,
+    List<MultipartFile>? toVehicleOdometerImage,
     String? tyreChangeDate,
     String? reasonForChange,
     String? changedBy,
@@ -430,10 +432,13 @@ class _RestClient implements RestClient {
     if (fromTyreCondition != null) {
       _data.fields.add(MapEntry('from_tyre_condition', fromTyreCondition));
     }
+    if (fromVehicleOdometer != null) {
+      _data.fields.add(MapEntry('from_vehicle_odometer', fromVehicleOdometer));
+    }
     if (fromVehicleOdometerImage != null) {
       _data.files.addAll(
         fromVehicleOdometerImage.map(
-          (i) => MapEntry('from_vehicle_odometer', i),
+          (i) => MapEntry('from_vehicle_odometer_image', i),
         ),
       );
     }
@@ -447,16 +452,21 @@ class _RestClient implements RestClient {
         MapEntry('to_vehicle_tyre_code_id', toVehicleTyreCodeId.toString()),
       );
     }
-    if (toTyreDepthMmImage != null) {
-      _data.files.addAll(
-        toTyreDepthMmImage.map((i) => MapEntry('to_tyre_depth_mm', i)),
-      );
+    if (toTyreDepthMm != null) {
+      _data.fields.add(MapEntry('to_tyre_depth_mm', toTyreDepthMm));
     }
     if (toTyreCondition != null) {
       _data.fields.add(MapEntry('to_tyre_condition', toTyreCondition));
     }
     if (toVehicleOdometer != null) {
       _data.fields.add(MapEntry('to_vehicle_odometer', toVehicleOdometer));
+    }
+    if (toVehicleOdometerImage != null) {
+      _data.files.addAll(
+        toVehicleOdometerImage.map(
+          (i) => MapEntry('to_vehicle_odometer_image', i),
+        ),
+      );
     }
     if (tyreChangeDate != null) {
       _data.fields.add(MapEntry('tyre_change_date', tyreChangeDate));

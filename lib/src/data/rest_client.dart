@@ -109,13 +109,16 @@ abstract class RestClient {
     @Part(name: "from_vehicle_tyre_code_id") int? fromVehicleTyreCodeId,
     @Part(name: "from_tyre_depth_mm") String? fromTyreDepthMm,
     @Part(name: "from_tyre_condition") String? fromTyreCondition,
-    @Part(name: "from_vehicle_odometer")
+    @Part(name: "from_vehicle_odometer") String? fromVehicleOdometer,
+    @Part(name: "from_vehicle_odometer_image")
     List<MultipartFile>? fromVehicleOdometerImage,
     @Part(name: "to_company_vehicle_id") int? toCompanyVehicleId,
     @Part(name: "to_vehicle_tyre_code_id") int? toVehicleTyreCodeId,
-    @Part(name: "to_tyre_depth_mm") List<MultipartFile>? toTyreDepthMmImage,
+    @Part(name: "to_tyre_depth_mm") String? toTyreDepthMm,
     @Part(name: 'to_tyre_condition') String? toTyreCondition,
     @Part(name: 'to_vehicle_odometer') String? toVehicleOdometer,
+    @Part(name: "to_vehicle_odometer_image")
+    List<MultipartFile>? toVehicleOdometerImage,
     @Part(name: 'tyre_change_date') String? tyreChangeDate,
     @Part(name: 'reason_for_change') String? reasonForChange,
     @Part(name: 'changed_by') String? changedBy,
