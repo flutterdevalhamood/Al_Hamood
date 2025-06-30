@@ -51,11 +51,44 @@ class CompanyVehicleController with ChangeNotifier {
     return 'Bearer ${AuthRepo.token}';
   }
 
+  String _selectedFilter = 'All Companies';
+  String get selectedFilter => _selectedFilter;
+
+  int getFilterCount(String filter) {
+    if (companyVehicleOriginalData == null) return 0;
+
+    if (filter == 'All Companies') {
+      return companyVehicleOriginalData!.length;
+    }
+
+    return companyVehicleOriginalData!.where((item) {
+      final projectName =
+          item['project']?['Name']?.toString().toUpperCase() ?? '';
+      return projectName == filter.toUpperCase();
+    }).length;
+  }
+
+  final List<String> availableFilters = [
+    'All Companies',
+    'ABRAHIMI WAHID FUEL TRADING LLC',
+    'AL HAMOOD GENERAL TRANSPORT EST.',
+    'HAMOOD FUEL SUPPLY SERVICES LLC',
+    'FOUR STARS GENERAL TRANSPORT ESTABLISHMENT',
+    'OTHER COMPANY-WITH WORK PERMIT',
+  ];
+
+  // 2. Add this method to CompanyVehicleController class
+  void setFilter(String filter) {
+    _selectedFilter = filter;
+    _applyCombinedFilter();
+    notifyListeners();
+  }
+
   Future<void> getCompanyVehicleData({bool loadMore = false}) async {
     if (!await _checkToken()) return;
 
     isLoading = true;
-    errorMessage = null; // Clear previous errors
+    errorMessage = null;
     notifyListeners();
 
     try {
@@ -75,20 +108,15 @@ class CompanyVehicleController with ChangeNotifier {
             if (loadMore) {
               companyVehicleOriginalData ??= [];
               companyVehicleOriginalData!.addAll(newCompanyVehicleData);
-              companyVehicleData ??= [];
-              companyVehicleData!.addAll(newCompanyVehicleData);
             } else {
               companyVehicleOriginalData = List.from(newCompanyVehicleData);
-              companyVehicleData = List.from(newCompanyVehicleData);
-              currentPage = 1; // Reset page on fresh load
+              currentPage = 1;
             }
 
             hasMore = data.length == totalPages;
 
-            // Apply current search filter if any
-            if (_searchQuery.isNotEmpty) {
-              _applySearchFilter();
-            }
+            // Apply current filters
+            _applyCombinedFilter();
           } else {
             hasMore = false;
             if (!loadMore) {
@@ -121,31 +149,40 @@ class CompanyVehicleController with ChangeNotifier {
 
   void searchCompanyVehicles(String query) {
     _searchQuery = query.trim();
-    _applySearchFilter();
+    _applyCombinedFilter();
     notifyListeners();
   }
 
-  void _applySearchFilter() {
+  void _applyCombinedFilter() {
     if (companyVehicleOriginalData == null) return;
 
-    if (_searchQuery.isEmpty) {
-      companyVehicleData = List.from(companyVehicleOriginalData!);
-    } else {
-      final query = _searchQuery.toLowerCase();
-      companyVehicleData =
-          companyVehicleOriginalData!.where((item) {
+    companyVehicleData =
+        companyVehicleOriginalData!.where((item) {
+          // Apply search filter
+          bool matchesSearch = true;
+          if (_searchQuery.isNotEmpty) {
+            final query = _searchQuery.toLowerCase();
             final plateNo1 = item['PlateNo1']?.toString().toLowerCase() ?? '';
             final plateNo2 = item['PlateNo2']?.toString().toLowerCase() ?? '';
-            return plateNo1.contains(query) || plateNo2.contains(query);
-          }).toList();
-    }
+            matchesSearch =
+                plateNo1.contains(query) || plateNo2.contains(query);
+          }
+
+          // Apply company filter
+          bool matchesCompany = true;
+          if (_selectedFilter != 'All Companies') {
+            final projectName =
+                item['project']?['Name']?.toString().toUpperCase() ?? '';
+            matchesCompany = projectName == _selectedFilter.toUpperCase();
+          }
+
+          return matchesSearch && matchesCompany;
+        }).toList();
   }
 
   void clearSearch() {
     _searchQuery = '';
-    if (companyVehicleOriginalData != null) {
-      companyVehicleData = List.from(companyVehicleOriginalData!);
-    }
+    _applyCombinedFilter();
     notifyListeners();
   }
 

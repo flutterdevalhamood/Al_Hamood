@@ -52,7 +52,32 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
             builder: (context, controller, child) {
               return Row(
                 children: [
-                  if (controller.isFiltered)
+                  // Filter Button
+                  IconButton(
+                    icon: Stack(
+                      children: [
+                        const Icon(Icons.filter_list, color: Colors.white),
+                        if (controller.selectedFilter != 'All Companies')
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    onPressed:
+                        () => _showFilterBottomSheet(context, controller),
+                  ),
+                  // Existing filter count display
+                  if (controller.isFiltered ||
+                      controller.selectedFilter != 'All Companies')
                     Container(
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(
@@ -937,5 +962,130 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     } catch (e) {
       return false;
     }
+  }
+
+  void _showFilterBottomSheet(
+    BuildContext context,
+    CompanyVehicleController controller,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+
+                // Header
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.filter_list, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Filter by Company',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (controller.selectedFilter != 'All Companies')
+                        TextButton(
+                          onPressed: () {
+                            controller.setFilter('All Companies');
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Clear'),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Filter options
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.availableFilters.length,
+                  itemBuilder: (context, index) {
+                    final filter = controller.availableFilters[index];
+                    final isSelected = controller.selectedFilter == filter;
+                    final count = controller.getFilterCount(filter);
+
+                    return ListTile(
+                      leading: Radio<String>(
+                        value: filter,
+                        groupValue: controller.selectedFilter,
+                        onChanged: (value) {
+                          if (value != null) {
+                            controller.setFilter(value);
+                            Navigator.pop(context);
+                          }
+                        },
+                        activeColor: Appcolors.darkBlue,
+                      ),
+                      title: Text(
+                        filter,
+                        style: TextStyle(
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.normal,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isSelected
+                                  ? Appcolors.darkBlue
+                                  : Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.grey[700],
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      onTap: () {
+                        controller.setFilter(filter);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+
+                // Bottom padding
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+    );
   }
 }
