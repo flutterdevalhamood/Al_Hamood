@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/BaseScreen.dart';
+import 'package:sample/src/providers/company_vehicle_controller.dart';
 import 'package:sample/src/providers/dashboard_controller.dart';
 import 'package:sample/src/providers/login_controller.dart';
 import 'package:sample/src/providers/swap_tyre_controller.dart';
@@ -27,6 +28,7 @@ void main() async {
           create: (context) => TyreReplacementController(),
         ),
         ChangeNotifierProvider(create: (context) => SwapTyreController()),
+        ChangeNotifierProvider(create: (context) => CompanyVehicleController()),
       ],
       child: const BaseScreen(),
     ),

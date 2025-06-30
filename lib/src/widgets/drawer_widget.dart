@@ -338,7 +338,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 _buildMenuItem(
                   context: context,
                   icon: Icons.tire_repair,
-                  title: 'Tire Services',
+                  title: 'Tire Replacement',
                   onTap: () {
                     NavigationService().pushNavigation(
                       Screenroutes.tyreReplacementListScreen,
@@ -353,6 +353,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   onTap: () {
                     NavigationService().pushNavigation(
                       Screenroutes.swapTyreListScreen,
+                    );
+                  },
+                ),
+
+                _buildMenuItem(
+                  context: context,
+                  icon: Icons.tire_repair,
+                  title: 'Company Vehicles',
+                  onTap: () {
+                    NavigationService().pushNavigation(
+                      Screenroutes.companyVehicleScreen,
                     );
                   },
                 ),

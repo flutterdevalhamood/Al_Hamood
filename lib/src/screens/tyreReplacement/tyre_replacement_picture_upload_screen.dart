@@ -186,8 +186,9 @@ class _TyreReplacementPictureUploadScreenState
         showSuccessSnack('Pictures uploaded successfully!');
 
         if (mounted) {
-          NavigationService().pushNavigation(
+          NavigationService().pushAndRemoveUntilNavigation(
             Screenroutes.tyreReplacementListScreen,
+            removeUntilPageName: Screenroutes.tyreReplacementListScreen,
           );
         }
       } else {

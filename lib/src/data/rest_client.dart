@@ -152,4 +152,11 @@ abstract class RestClient {
     @Header("Authorization") String? token,
     @Field("id") int? id,
   });
+
+  @GET('/api/CompanyVehicles/paginate/{page}/{limit}')
+  Future<dynamic> getCompanyVehiclesData(
+    @Path("page") int page,
+    @Path("limit") int limit,
+    @Header("Authorization") String? token,
+  );
 }

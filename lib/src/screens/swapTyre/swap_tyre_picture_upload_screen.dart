@@ -184,7 +184,10 @@ class _SwapTyrePictureUploadScreenState
         showSuccessSnack('Pictures uploaded successfully!');
 
         if (mounted) {
-          NavigationService().pushNavigation(Screenroutes.swapTyreListScreen);
+          NavigationService().pushAndRemoveUntilNavigation(
+            Screenroutes.swapTyreListScreen,
+            removeUntilPageName: Screenroutes.swapTyreListScreen,
+          );
         }
       } else {
         showErrorSnack(

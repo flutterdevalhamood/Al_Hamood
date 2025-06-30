@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sample/src/screens/change_password_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_data_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_list_screen.dart';
-import 'package:sample/src/screens/swapTyre/swap_tyre_picture_upload_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_data_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_list_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_picture_upload_screen.dart';
 
 import '../constants/string_constants.dart';
+import '../screens/company_vehicle_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/login_screen.dart';
 
@@ -35,6 +35,8 @@ class Screenroutes {
   static const String swapTyreDetailScreen = "swapTyreDetailScreen";
   static const String swapTyrePictureUploadScreen =
       "swapTyrePictureUploadScreen";
+
+  static const String companyVehicleScreen = "companyVehicleScreen";
 
   static Route<dynamic>? routes(RouteSettings settings) {
     StringConstants.currentRoute = settings.name ?? "";
@@ -115,13 +117,11 @@ class Screenroutes {
           },
         );
 
-      case Screenroutes.swapTyrePictureUploadScreen:
+      case Screenroutes.companyVehicleScreen:
         return MaterialPageRoute(
-          settings: RouteSettings(
-            name: Screenroutes.swapTyrePictureUploadScreen,
-          ),
+          settings: RouteSettings(name: Screenroutes.companyVehicleScreen),
           builder: (BuildContext context) {
-            return SwapTyrePictureUploadScreen();
+            return CompanyVehicleScreen();
           },
         );
     }
