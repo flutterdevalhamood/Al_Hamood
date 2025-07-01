@@ -7,7 +7,7 @@ import '../repo/auth_repo.dart';
 class CompanyVehicleController with ChangeNotifier {
   bool isLoading = false;
   int currentPage = 1;
-  final int totalPages = 10;
+  final int itemsPerPage = 100;
   bool hasMore = true;
   String? errorMessage;
   int? id;
@@ -94,7 +94,7 @@ class CompanyVehicleController with ChangeNotifier {
     try {
       final companyVehicleResponse = await restApi.getCompanyVehiclesData(
         currentPage,
-        totalPages,
+        itemsPerPage, // Pass itemsPerPage instead of totalPages
         _getAuthHeader(),
       );
 
@@ -113,7 +113,9 @@ class CompanyVehicleController with ChangeNotifier {
               currentPage = 1;
             }
 
-            hasMore = data.length == totalPages;
+            // Check if there are more pages
+            // If we received fewer items than requested, we've reached the end
+            hasMore = data.length == itemsPerPage;
 
             // Apply current filters
             _applyCombinedFilter();
@@ -189,6 +191,8 @@ class CompanyVehicleController with ChangeNotifier {
   Future<void> refreshData() async {
     currentPage = 1;
     hasMore = true;
+    companyVehicleData = null;
+    companyVehicleOriginalData = null;
     await getCompanyVehicleData();
   }
 
@@ -199,6 +203,7 @@ class CompanyVehicleController with ChangeNotifier {
     hasMore = true;
     errorMessage = null;
     _searchQuery = '';
+    _selectedFilter = 'All Companies';
     notifyListeners();
   }
 
