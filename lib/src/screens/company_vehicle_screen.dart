@@ -290,6 +290,23 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // EXPIRY INFORMATION MOVED TO TOP - PRIMARY FOCUS
+            if (vehicleType == '0')
+              _buildExpirySection(
+                expiryDate:
+                    vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
+                title: 'Mulkiya Expiry Date',
+              )
+            else
+              _buildTruckTrailerExpirySection(
+                truckExpiry:
+                    vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
+                trailerExpiry:
+                    vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A',
+              ),
+
+            const SizedBox(height: 16),
+
             // Header with vehicle type indicator
             Row(
               children: [
@@ -322,7 +339,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                       Text(
                         vehicleType == '1'
                             ? 'Truck + Trailer'
-                            : 'Single Vehicle',
+                            : 'Light Vehicle',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -340,11 +357,11 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
 
             const SizedBox(height: 16),
 
-            // Vehicle Information
+            // Vehicle Information (without expiry info)
             if (vehicleType == '0')
-              _buildSingleVehicleInfo(vehicle)
+              _buildSingleVehicleInfoWithoutExpiry(vehicle)
             else
-              _buildTruckTrailerInfo(vehicle),
+              _buildTruckTrailerInfoWithoutExpiry(vehicle),
 
             const SizedBox(height: 16),
 
@@ -375,7 +392,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     );
   }
 
-  Widget _buildSingleVehicleInfo(Map<String, dynamic> vehicle) {
+  Widget _buildSingleVehicleInfoWithoutExpiry(Map<String, dynamic> vehicle) {
     return Column(
       children: [
         // License Plate
@@ -404,16 +421,56 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
 
         const SizedBox(height: 12),
 
-        // Expiry and Chassis
-        _buildExpiryAndChassisInfo(
-          expiryDate: vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-          chassisNumber: vehicle['Plate1ChassisNumber']?.toString() ?? 'N/A',
+        // Chassis Number only
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.confirmation_number,
+                color: Colors.grey[600],
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chassis Number',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      vehicle['Plate1ChassisNumber']?.toString() ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildTruckTrailerInfo(Map<String, dynamic> vehicle) {
+  Widget _buildTruckTrailerInfoWithoutExpiry(Map<String, dynamic> vehicle) {
     return Column(
       children: [
         // Truck Information
@@ -457,7 +514,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   Icons.calendar_today,
                   compact: true,
                 ),
-
                 _buildDetailItem(
                   'Vehicle Kind',
                   vehicle['plate_1_vehicle_kind']?.toString() ?? 'N/A',
@@ -512,7 +568,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   Icons.calendar_today,
                   compact: true,
                 ),
-
                 _buildDetailItem(
                   'Vehicle Kind',
                   vehicle['plate_2_vehicle_kind']?.toString() ?? 'N/A',
@@ -523,31 +578,278 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
             ],
           ),
         ),
+      ],
+    );
+  }
 
-        const SizedBox(height: 12),
+  Widget _buildExpirySection({
+    required String expiryDate,
+    required String title,
+  }) {
+    final isExpired = _isDateExpired(expiryDate);
+    final isExpiringSoon = _isExpiringSoon(expiryDate);
+    final daysLeft = _getDaysLeft(expiryDate);
 
-        // Combined Expiry Information
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isExpired || isExpiringSoon ? Colors.red[50] : Colors.green[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              isExpired || isExpiringSoon
+                  ? Colors.red[300]!
+                  : Colors.green[300]!,
+          width: 2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isExpired || isExpiringSoon
+                      ? Colors.red[100]
+                      : Colors.green[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isExpired
+                  ? Icons.error
+                  : isExpiringSoon
+                  ? Icons.warning
+                  : Icons.check_circle,
+              color:
+                  isExpired || isExpiringSoon
+                      ? Colors.red[600]
+                      : Colors.green[600],
+              size: 24,
+            ),
           ),
-          child: Column(
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isExpired ? 'Expired:' : 'Expires On:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      _formatDate(expiryDate),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isExpired || isExpiringSoon
+                                ? Colors.red[700]
+                                : Colors.green[700],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (daysLeft.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              isExpired || isExpiringSoon
+                                  ? Colors.red[100]
+                                  : Colors.green[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          daysLeft,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                isExpired || isExpiringSoon
+                                    ? Colors.red[700]
+                                    : Colors.green[700],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTruckTrailerExpirySection({
+    required String truckExpiry,
+    required String trailerExpiry,
+  }) {
+    final truckExpired = _isDateExpired(truckExpiry);
+    final truckExpiringSoon = _isExpiringSoon(truckExpiry);
+    final trailerExpired = _isDateExpired(trailerExpiry);
+    final trailerExpiringSoon = _isExpiringSoon(trailerExpiry);
+
+    final truckDaysLeft = _getDaysLeft(truckExpiry);
+    final trailerDaysLeft = _getDaysLeft(trailerExpiry);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color:
+            (truckExpired ||
+                    truckExpiringSoon ||
+                    trailerExpired ||
+                    trailerExpiringSoon)
+                ? Colors.red[50]
+                : Colors.green[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color:
+              (truckExpired ||
+                      truckExpiringSoon ||
+                      trailerExpired ||
+                      trailerExpiringSoon)
+                  ? Colors.red[300]!
+                  : Colors.green[300]!,
+          width: 2,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Row(
             children: [
-              _buildExpiryRow(
-                'Truck Expiry',
-                vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-                Icons.local_shipping,
-                Colors.blue,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color:
+                      (truckExpired ||
+                              truckExpiringSoon ||
+                              trailerExpired ||
+                              trailerExpiringSoon)
+                          ? Colors.red[100]
+                          : Colors.green[100],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  (truckExpired || trailerExpired)
+                      ? Icons.error
+                      : (truckExpiringSoon || trailerExpiringSoon)
+                      ? Icons.warning
+                      : Icons.check_circle,
+                  color:
+                      (truckExpired ||
+                              truckExpiringSoon ||
+                              trailerExpired ||
+                              trailerExpiringSoon)
+                          ? Colors.red[600]
+                          : Colors.green[600],
+                  size: 24,
+                ),
               ),
-              const SizedBox(height: 8),
-              _buildExpiryRow(
-                'Trailer Expiry',
-                vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A',
-                Icons.rv_hookup,
-                Colors.orange,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Mulkiya Expiry Dates',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Truck Expiry
+          _buildExpiryRowEnhanced(
+            truckExpired ? 'Expired' : 'Truck Expiry',
+            truckExpiry,
+            Icons.local_shipping,
+            truckExpired || truckExpiringSoon ? Colors.red : Colors.green,
+            truckDaysLeft,
+          ),
+
+          const SizedBox(height: 12),
+
+          // Trailer Expiry
+          _buildExpiryRowEnhanced(
+            trailerExpired ? 'Expired' : 'Trailer Expiry',
+            trailerExpiry,
+            Icons.rv_hookup,
+            trailerExpired || trailerExpiringSoon ? Colors.red : Colors.green,
+            trailerDaysLeft,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpiryRowEnhanced(
+    String label,
+    String date,
+    IconData icon,
+    MaterialColor color,
+    String daysLeft,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, color: color[600], size: 18),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Row(
+                children: [
+                  Text(
+                    _formatDate(date),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: color[700],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (daysLeft.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        daysLeft,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: color[700],
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ],
           ),
@@ -856,58 +1158,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     );
   }
 
-  Widget _buildExpiryRow(
-    String label,
-    String date,
-    IconData icon,
-    MaterialColor color,
-  ) {
-    final isExpired = _isDateExpired(date);
-    final isExpiringSoon = _isExpiringSoon(date);
-
-    return Row(
-      children: [
-        Icon(icon, color: color[600], size: 16),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color:
-                isExpired
-                    ? Colors.red[100]
-                    : isExpiringSoon
-                    ? Colors.orange[100]
-                    : Colors.green[100],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            _formatDate(date),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color:
-                  isExpired
-                      ? Colors.red[700]
-                      : isExpiringSoon
-                      ? Colors.orange[700]
-                      : Colors.green[700],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   String _formatDate(String dateString) {
     try {
       if (dateString == 'N/A' || dateString.isEmpty) return 'N/A';
@@ -961,6 +1211,29 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
       return date.isAfter(now) && date.isBefore(thirtyDaysFromNow);
     } catch (e) {
       return false;
+    }
+  }
+
+  String _getDaysLeft(String dateString) {
+    try {
+      if (dateString == 'N/A' || dateString.isEmpty) return '';
+      if (dateString.startsWith('9999')) return '';
+
+      final expiryDate = DateTime.parse(dateString);
+      final today = DateTime.now();
+      final difference = expiryDate.difference(today).inDays;
+
+      if (difference < 0) {
+        return '(${difference.abs()} days ago)';
+      } else if (difference == 0) {
+        return '(Today)';
+      } else if (difference == 1) {
+        return '(1 day left)';
+      } else {
+        return '($difference days left)';
+      }
+    } catch (e) {
+      return '';
     }
   }
 
