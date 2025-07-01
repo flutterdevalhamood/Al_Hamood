@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/providers/company_vehicle_controller.dart';
 import 'package:sample/src/util/app_colors.dart';
+import 'package:sample/src/widgets/date_format.dart';
+import 'package:sample/src/widgets/number_plate_responsive_text.dart';
 
 class CompanyVehicleScreen extends StatefulWidget {
   const CompanyVehicleScreen({super.key});
@@ -645,7 +647,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                 Row(
                   children: [
                     Text(
-                      _formatDate(expiryDate),
+                      formatDate(expiryDate),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -822,7 +824,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
               Row(
                 children: [
                   Text(
-                    _formatDate(date),
+                    formatDate(date),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -865,6 +867,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     required String color,
     required String title,
     bool compact = false,
+    double fixedWidth = 320, // Fixed width for the plate
   }) {
     Color plateColor = _getPlateColor(color);
     Color textColor = _getTextColor(color);
@@ -882,6 +885,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
           ),
         if (!compact) const SizedBox(height: 8),
         Container(
+          width: fixedWidth,
           padding: EdgeInsets.symmetric(
             horizontal: compact ? 12 : 16,
             vertical: compact ? 8 : 12,
@@ -899,31 +903,47 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
             ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Category (like "AD 2")
-              if (category.isNotEmpty)
-                Text(
-                  category,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: compact ? 20 : 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
+              // Horizontal layout for category and plate number
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Category section (left side)
+                  if (category.isNotEmpty) ...[
+                    Flexible(
+                      flex: 2,
+                      child: buildResponsiveText(
+                        text: category,
+                        textColor: textColor,
+                        maxFontSize: compact ? 18 : 22,
+                        minFontSize: compact ? 12 : 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    SizedBox(width: compact ? 8 : 12),
+                  ],
 
-              // Plate Number
-              Text(
-                plateNumber,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: compact ? 20 : 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
+                  // Plate number section (right side)
+                  Flexible(
+                    flex: category.isNotEmpty ? 5 : 7,
+                    child: buildResponsiveText(
+                      text: plateNumber,
+                      textColor: textColor,
+                      maxFontSize: compact ? 20 : 26,
+                      minFontSize: compact ? 14 : 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
               ),
-              // UAE text (small)
-              if (!compact)
+
+              // UAE text (small, bottom)
+              if (!compact) ...[
+                const SizedBox(height: 4),
                 Text(
                   'UAE',
                   style: TextStyle(
@@ -933,6 +953,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                     letterSpacing: 1,
                   ),
                 ),
+              ],
             ],
           ),
         ),
@@ -1026,165 +1047,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildExpiryAndChassisInfo({
-    required String expiryDate,
-    required String chassisNumber,
-  }) {
-    final isExpired = _isDateExpired(expiryDate);
-    final isExpiringSoon = _isExpiringSoon(expiryDate);
-
-    return Column(
-      children: [
-        // Expiry Date
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color:
-                isExpired
-                    ? Colors.red[50]
-                    : isExpiringSoon
-                    ? Colors.orange[50]
-                    : Colors.green[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color:
-                  isExpired
-                      ? Colors.red[300]!
-                      : isExpiringSoon
-                      ? Colors.orange[300]!
-                      : Colors.green[300]!,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                isExpired
-                    ? Icons.error
-                    : isExpiringSoon
-                    ? Icons.warning
-                    : Icons.check_circle,
-                color:
-                    isExpired
-                        ? Colors.red[600]
-                        : isExpiringSoon
-                        ? Colors.orange[600]
-                        : Colors.green[600],
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mulkiya Expiry Date',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _formatDate(expiryDate),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            isExpired
-                                ? Colors.red[700]
-                                : isExpiringSoon
-                                ? Colors.orange[700]
-                                : Colors.green[700],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Chassis Number
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.confirmation_number,
-                color: Colors.grey[600],
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Chassis Number',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      chassisNumber,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatDate(String dateString) {
-    try {
-      if (dateString == 'N/A' || dateString.isEmpty) return 'N/A';
-
-      // Handle special dates like "9999-09-09"
-      if (dateString.startsWith('9999')) return 'No Expiry';
-
-      final date = DateTime.parse(dateString);
-      final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
-      ];
-
-      return '${date.day} ${months[date.month - 1]} ${date.year}';
-    } catch (e) {
-      return dateString;
-    }
   }
 
   bool _isDateExpired(String dateString) {
