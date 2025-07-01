@@ -421,7 +421,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
           ),
         ]),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 4),
 
         // Chassis Number only
         Container(
@@ -993,8 +993,51 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     }
   }
 
+  // Widget _buildVehicleDetailsGrid(List<Widget> details) {
+  //   return Wrap(spacing: 8, runSpacing: 8, children: details);
+  // }
+
   Widget _buildVehicleDetailsGrid(List<Widget> details) {
-    return Wrap(spacing: 8, runSpacing: 8, children: details);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double screenWidth = constraints.maxWidth;
+
+        // Determine how many items per row based on screen width
+        int crossAxisCount;
+        double childAspectRatio;
+
+        if (screenWidth < 400) {
+          // Small phones - 1 item per row, more height
+          crossAxisCount = 1;
+          childAspectRatio = 4.5; // Wider aspect ratio for horizontal layout
+        } else if (screenWidth < 600) {
+          // Medium phones - 2 items per row
+          crossAxisCount = 2;
+          childAspectRatio = 3.5;
+        } else if (screenWidth < 900) {
+          // Tablets - 2 items per row with better spacing
+          crossAxisCount = 2;
+          childAspectRatio = 4.0;
+        } else {
+          // Large screens - 3 items per row
+          crossAxisCount = 3;
+          childAspectRatio = 3.8;
+        }
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: childAspectRatio,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: details.length,
+          itemBuilder: (context, index) => details[index],
+        );
+      },
+    );
   }
 
   Widget _buildDetailItem(
@@ -1003,49 +1046,87 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     IconData icon, {
     bool compact = false,
   }) {
-    return Container(
-      width: compact ? 140 : 160,
-      padding: EdgeInsets.all(compact ? 8 : 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double availableWidth = constraints.maxWidth;
+        bool isVerySmall = availableWidth < 140;
+
+        // Dynamic sizing based on available width
+        double iconSize = isVerySmall ? 16 : (compact ? 18 : 20);
+        double labelFontSize = isVerySmall ? 10 : (compact ? 11 : 12);
+        double valueFontSize = isVerySmall ? 12 : (compact ? 13 : 14);
+        double padding = isVerySmall ? 8 : (compact ? 10 : 12);
+
+        return Container(
+          width: double.infinity, // Take full available width
+          padding: EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Row(
+            // Changed to Row for horizontal layout
             children: [
-              Icon(icon, size: compact ? 14 : 16, color: Colors.grey[600]),
-              const SizedBox(width: 4),
+              // Icon section
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(icon, size: iconSize, color: Colors.grey[600]),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Text content section
               Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: compact ? 10 : 12,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Label
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: labelFontSize,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    const SizedBox(height: 2),
+
+                    // Value with responsive text sizing
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          fontSize: valueFontSize,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: compact ? 12 : 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
