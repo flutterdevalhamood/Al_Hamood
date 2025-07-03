@@ -66,7 +66,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 style: TextStyle(color: darkBlue, fontWeight: FontWeight.bold),
               ),
               content: Text(
-                'Are you sure you want to logout from TireHub?',
+                'Are you sure you want to logout from Alhamood?',
                 style: TextStyle(color: darkBlue),
               ),
               actions: [
@@ -146,7 +146,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         ),
       );
     } else {
-      // Default tire-themed avatar when no image is available
+      // Default user avatar when no image is available
       return Container(
         width: 60,
         height: 60,
@@ -162,7 +162,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             ),
           ],
         ),
-        child: const Icon(Icons.tire_repair, size: 35, color: Colors.white),
+        child: const Icon(Icons.person, size: 35, color: Colors.white),
       );
     }
   }
@@ -191,17 +191,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // Header Section with TireHub branding
+                // Header Section with Alhamood branding
                 Container(
                   padding: const EdgeInsets.fromLTRB(24, 60, 24, 24),
                   child: Column(
                     children: [
-                      // App Logo
+                      // App Logo - Replaced with Alhamood logo
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 80,
+                        height: 80,
                         decoration: BoxDecoration(
-                          color: primaryColor,
+                          color: Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -211,15 +211,17 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.tire_repair,
-                          size: 25,
-                          color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'TireHub',
+                        'Alhamood',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,

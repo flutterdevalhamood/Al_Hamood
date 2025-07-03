@@ -644,7 +644,10 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       formatDate(expiryDate),
@@ -657,7 +660,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                                 : Colors.green[700],
                       ),
                     ),
-                    const SizedBox(width: 8),
                     if (daysLeft.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -821,7 +823,10 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                 ),
               ),
               const SizedBox(height: 2),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     formatDate(date),
@@ -831,7 +836,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                       color: color[700],
                     ),
                   ),
-                  const SizedBox(width: 8),
                   if (daysLeft.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
