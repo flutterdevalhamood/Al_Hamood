@@ -305,19 +305,6 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                                   ],
                                 ),
                               ),
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: primaryColor.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.edit,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
                             ],
                           ),
                         ),

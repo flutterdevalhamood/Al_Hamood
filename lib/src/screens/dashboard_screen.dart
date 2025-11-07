@@ -163,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       physics: NeverScrollableScrollPhysics(),
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
-                      childAspectRatio: 1.0,
+                      childAspectRatio: 0.8,
                       children: [
                         _buildQuickActionCard(
                           'Tire Replacement',
