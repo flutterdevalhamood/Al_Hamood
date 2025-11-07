@@ -214,13 +214,6 @@ class BasePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(title ?? "", style: Theme.of(context).textTheme.displaySmall),
-          // IconButton(
-          //     onPressed: (tapOnClose != null)
-          //         ? tapOnClose!
-          //         : () {
-          //       NavigationService().popNavigation();
-          //     },
-          //     icon: SvgPicture.asset(ImageConstants.close(context),)),
         ],
       ),
     );
@@ -253,30 +246,12 @@ class BasePage extends StatelessWidget {
     );
   }
 
-  _getBackButton(BuildContext context) {
-    // return IconButton(
-    //   onPressed: () async {
-    //
-    //   },
-    //   icon:SvgPicture.asset(
-    //     ImageConstants.back(context),
-    //     fit: BoxFit.scaleDown,
-    //     alignment: Alignment.center,
-    //   ),
-    // );
-  }
+  _getBackButton(BuildContext context) {}
 
   Widget getBody(BuildContext context) {
     return Container(
       color: Colors.transparent,
 
-      // decoration: BoxDecoration(
-      //   image: DecorationImage(
-      //       // scale: 10,
-      //       alignment: Alignment.topCenter,
-      //       image: AssetImage(ImageConstants.background(context)),
-      //       fit: BoxFit.cover),
-      // ),
       child:
           (customScrollRequired == true)
               ? CustomScrollView(

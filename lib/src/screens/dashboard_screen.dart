@@ -15,7 +15,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color primaryColor = Color(0xFFE94560);
   static const Color darkBlue = Color(0xFF1A1A2E);
   static const Color mediumBlue = Color(0xFF16213E);
-  static const Color lightBlue = Color(0xFF0F3460);
 
   Future<bool> _onWillPop() async {
     bool? shouldLogout = await showDialog(
