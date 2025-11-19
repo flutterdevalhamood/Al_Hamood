@@ -62,20 +62,36 @@ class CompanyVehicleController with ChangeNotifier {
     }
 
     return companyVehicleOriginalData!.where((item) {
-      final projectName =
-          item['project']?['Name']?.toString().toUpperCase() ?? '';
-      return projectName == filter.toUpperCase();
+      final projectName = item['project']?['Name']?.toString() ?? '';
+      // Use exact match since we're using exact names from API
+      return projectName == filter;
     }).length;
   }
 
-  final List<String> availableFilters = [
-    'All Companies',
-    'ABRAHIMI WAHID FUEL TRADING LLC',
-    'AL HAMOOD GENERAL TRANSPORT EST.',
-    'HAMOOD FUEL SUPPLY SERVICES LLC',
-    'FOUR STARS GENERAL TRANSPORT ESTABLISHMENT',
-    'OTHER COMPANY-WITH WORK PERMIT',
-  ];
+  // Remove the hardcoded list and replace with a getter
+  List<String> get availableFilters {
+    if (companyVehicleOriginalData == null ||
+        companyVehicleOriginalData!.isEmpty) {
+      return ['All Companies'];
+    }
+
+    // Extract unique company names from the data
+    Set<String> companies = {'All Companies'};
+
+    for (var item in companyVehicleOriginalData!) {
+      final projectName = item['project']?['Name']?.toString() ?? '';
+      if (projectName.isNotEmpty) {
+        companies.add(projectName);
+      }
+    }
+
+    return companies.toList()..sort((a, b) {
+      // Keep "All Companies" at the top
+      if (a == 'All Companies') return -1;
+      if (b == 'All Companies') return 1;
+      return a.compareTo(b);
+    });
+  }
 
   // 2. Add this method to CompanyVehicleController class
   void setFilter(String filter) {
@@ -173,9 +189,9 @@ class CompanyVehicleController with ChangeNotifier {
           // Apply company filter
           bool matchesCompany = true;
           if (_selectedFilter != 'All Companies') {
-            final projectName =
-                item['project']?['Name']?.toString().toUpperCase() ?? '';
-            matchesCompany = projectName == _selectedFilter.toUpperCase();
+            final projectName = item['project']?['Name']?.toString() ?? '';
+            // Use case-sensitive exact match since we're now using exact names from API
+            matchesCompany = projectName == _selectedFilter;
           }
 
           return matchesSearch && matchesCompany;

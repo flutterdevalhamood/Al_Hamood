@@ -276,9 +276,122 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
           final vehicle = controller.companyVehicleData![index];
           final vehicleType = vehicle['type']?.toString() ?? '0';
 
-          return _buildVehicleCard(vehicle, vehicleType);
+          // Alternate card background color
+          final isEvenIndex = index % 2 == 0;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            elevation: 3,
+            color: isEvenIndex ? Colors.white : Colors.grey[300],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: _buildVehicleCardContent(vehicle, vehicleType),
+            ),
+          );
         },
       ),
+    );
+  }
+
+  Widget _buildVehicleCardContent(
+    Map<String, dynamic> vehicle,
+    String vehicleType,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // EXPIRY INFORMATION MOVED TO TOP - PRIMARY FOCUS
+        if (vehicleType == '0')
+          _buildExpirySection(
+            expiryDate: vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
+            title: 'Mulkiya Expiry Date',
+          )
+        else
+          _buildTruckTrailerExpirySection(
+            truckExpiry:
+                vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
+            trailerExpiry:
+                vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A',
+          ),
+
+        const SizedBox(height: 16),
+
+        // Header with vehicle type indicator
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color:
+                    vehicleType == '1' ? Colors.orange[100] : Colors.blue[100],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    vehicleType == '1'
+                        ? Icons.fire_truck
+                        : Icons.directions_car,
+                    size: 16,
+                    color:
+                        vehicleType == '1'
+                            ? Colors.orange[700]
+                            : Colors.blue[700],
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    vehicleType == '1' ? 'Truck + Trailer' : 'Light Vehicle',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          vehicleType == '1'
+                              ? Colors.orange[700]
+                              : Colors.blue[700],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 16),
+
+        // Vehicle Information (without expiry info)
+        if (vehicleType == '0')
+          _buildSingleVehicleInfoWithoutExpiry(vehicle)
+        else
+          _buildTruckTrailerInfoWithoutExpiry(vehicle),
+
+        const SizedBox(height: 16),
+
+        // Project Information
+        if (vehicle['project'] != null) ...[
+          const Divider(),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.business, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  vehicle['project']['Name'] ?? 'Unknown Project',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 
@@ -777,7 +890,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
 
           // Truck Expiry
           _buildExpiryRowEnhanced(
-            truckExpired ? 'Expired' : 'Truck Expiry',
+            truckExpired ? 'Truck Expired' : 'Truck Expiry',
             truckExpiry,
             Icons.local_shipping,
             truckExpired || truckExpiringSoon ? Colors.red : Colors.green,
@@ -788,7 +901,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
 
           // Trailer Expiry
           _buildExpiryRowEnhanced(
-            trailerExpired ? 'Expired' : 'Trailer Expiry',
+            trailerExpired ? 'Trailer Expired' : 'Trailer Expiry',
             trailerExpiry,
             Icons.rv_hookup,
             trailerExpired || trailerExpiringSoon ? Colors.red : Colors.green,
