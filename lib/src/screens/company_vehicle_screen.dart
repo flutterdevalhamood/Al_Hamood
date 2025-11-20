@@ -54,7 +54,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
             builder: (context, controller, child) {
               return Row(
                 children: [
-                  // Filter Button
                   IconButton(
                     icon: Stack(
                       children: [
@@ -77,7 +76,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                     onPressed:
                         () => _showFilterBottomSheet(context, controller),
                   ),
-                  // Existing filter count display
                   if (controller.isFiltered ||
                       controller.selectedFilter != 'All Companies')
                     Container(
@@ -276,153 +274,29 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
           final vehicle = controller.companyVehicleData![index];
           final vehicleType = vehicle['type']?.toString() ?? '0';
 
-          // Alternate card background color
-          final isEvenIndex = index % 2 == 0;
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            elevation: 3,
-            color: isEvenIndex ? Colors.white : Colors.grey[300],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _buildVehicleCardContent(vehicle, vehicleType),
-            ),
-          );
+          return _buildVehicleCard(vehicle, vehicleType, index);
         },
       ),
     );
   }
 
-  Widget _buildVehicleCardContent(
+  Widget _buildVehicleCard(
     Map<String, dynamic> vehicle,
     String vehicleType,
+    int index,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // EXPIRY INFORMATION MOVED TO TOP - PRIMARY FOCUS
-        if (vehicleType == '0')
-          _buildExpirySection(
-            expiryDate: vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-            title: 'Mulkiya Expiry Date',
-          )
-        else
-          _buildTruckTrailerExpirySection(
-            truckExpiry:
-                vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-            trailerExpiry:
-                vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A',
-          ),
-
-        const SizedBox(height: 16),
-
-        // Header with vehicle type indicator
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color:
-                    vehicleType == '1' ? Colors.orange[100] : Colors.blue[100],
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    vehicleType == '1'
-                        ? Icons.fire_truck
-                        : Icons.directions_car,
-                    size: 16,
-                    color:
-                        vehicleType == '1'
-                            ? Colors.orange[700]
-                            : Colors.blue[700],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    vehicleType == '1' ? 'Truck + Trailer' : 'Light Vehicle',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          vehicleType == '1'
-                              ? Colors.orange[700]
-                              : Colors.blue[700],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 16),
-
-        // Vehicle Information (without expiry info)
-        if (vehicleType == '0')
-          _buildSingleVehicleInfoWithoutExpiry(vehicle)
-        else
-          _buildTruckTrailerInfoWithoutExpiry(vehicle),
-
-        const SizedBox(height: 16),
-
-        // Project Information
-        if (vehicle['project'] != null) ...[
-          const Divider(),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.business, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  vehicle['project']['Name'] ?? 'Unknown Project',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildVehicleCard(Map<String, dynamic> vehicle, String vehicleType) {
+    final isEvenIndex = index % 2 == 0;
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 3,
+      elevation: 2,
+      color: isEvenIndex ? Colors.white : Colors.blue[50],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // EXPIRY INFORMATION MOVED TO TOP - PRIMARY FOCUS
-            if (vehicleType == '0')
-              _buildExpirySection(
-                expiryDate:
-                    vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-                title: 'Mulkiya Expiry Date',
-              )
-            else
-              _buildTruckTrailerExpirySection(
-                truckExpiry:
-                    vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A',
-                trailerExpiry:
-                    vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A',
-              ),
-
-            const SizedBox(height: 16),
-
-            // Header with vehicle type indicator
+            // CARD 1: Plate Numbers Row with Vehicle Type Badge
             Row(
               children: [
                 Container(
@@ -472,456 +346,321 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
 
             const SizedBox(height: 16),
 
-            // Vehicle Information (without expiry info)
-            if (vehicleType == '0')
-              _buildSingleVehicleInfoWithoutExpiry(vehicle)
-            else
-              _buildTruckTrailerInfoWithoutExpiry(vehicle),
+            // Plate Numbers in Row
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child:
+                  vehicleType == '1'
+                      ? Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Truck Plate',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  vehicle['PlateNo1']?.toString() ?? 'N/A',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 40,
+                            color: Colors.grey[300],
+                            margin: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Trailer Plate',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  vehicle['PlateNo2']?.toString() ?? 'N/A',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                      : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Plate Number',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            vehicle['PlateNo1']?.toString() ?? 'N/A',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
 
             const SizedBox(height: 16),
 
-            // Project Information
-            if (vehicle['project'] != null) ...[
-              const Divider(),
-              const SizedBox(height: 8),
-              Row(
+            // CARD 2: Number Plates Display
+            if (vehicleType == '0')
+              _buildLicensePlate(
+                category: vehicle['plate_1_category']?.toString() ?? '',
+                plateNumber: vehicle['PlateNo1']?.toString() ?? 'N/A',
+                color: vehicle['plate_1_color']?.toString() ?? 'white',
+              )
+            else
+              Column(
                 children: [
-                  Icon(Icons.business, size: 16, color: Colors.grey[600]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      vehicle['project']['Name'] ?? 'Unknown Project',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                  _buildLicensePlate(
+                    category: vehicle['plate_1_category']?.toString() ?? '',
+                    plateNumber: vehicle['PlateNo1']?.toString() ?? 'N/A',
+                    color: vehicle['plate_1_color']?.toString() ?? 'white',
+                    label: 'Truck Plate',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildLicensePlate(
+                    category: vehicle['plate_2_category']?.toString() ?? '',
+                    plateNumber: vehicle['PlateNo2']?.toString() ?? 'N/A',
+                    color: vehicle['plate_2_color']?.toString() ?? 'white',
+                    label: 'Trailer Plate',
                   ),
                 ],
               ),
-            ],
+
+            const SizedBox(height: 16),
+
+            // CARD 3: Vehicle Details with Expiry
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (vehicleType == '0')
+                    _buildSingleVehicleDetails(vehicle)
+                  else
+                    _buildTruckTrailerDetails(vehicle),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSingleVehicleInfoWithoutExpiry(Map<String, dynamic> vehicle) {
-    return Column(
-      children: [
-        // License Plate
-        _buildLicensePlate(
-          category: vehicle['plate_1_category']?.toString() ?? '',
-          plateNumber: vehicle['PlateNo1']?.toString() ?? 'N/A',
-          color: vehicle['plate_1_color']?.toString() ?? 'white',
-          title: 'License Plate',
-        ),
-
-        const SizedBox(height: 12),
-
-        // Vehicle Details Grid
-        _buildVehicleDetailsGrid([
-          _buildDetailItem(
-            'Model Year',
-            vehicle['plate_1_model_year']?.toString() ?? 'N/A',
-            Icons.calendar_today,
-          ),
-          _buildDetailItem(
-            'Vehicle Kind',
-            vehicle['plate_1_vehicle_kind']?.toString() ?? 'N/A',
-            Icons.directions_car,
-          ),
-        ]),
-
-        const SizedBox(height: 4),
-
-        // Chassis Number only
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.confirmation_number,
-                color: Colors.grey[600],
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Chassis Number',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      vehicle['Plate1ChassisNumber']?.toString() ?? 'N/A',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTruckTrailerInfoWithoutExpiry(Map<String, dynamic> vehicle) {
-    return Column(
-      children: [
-        // Truck Information
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.blue[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue[200]!),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.local_shipping, color: Colors.blue[700], size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Truck (Primary Vehicle)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue[700],
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildLicensePlate(
-                category: vehicle['plate_1_category']?.toString() ?? '',
-                plateNumber: vehicle['PlateNo1']?.toString() ?? 'N/A',
-                color: vehicle['plate_1_color']?.toString() ?? 'white',
-                title: 'Truck Plate',
-                compact: true,
-              ),
-              const SizedBox(height: 8),
-              _buildVehicleDetailsGrid([
-                _buildDetailItem(
-                  'Model Year',
-                  vehicle['plate_1_model_year']?.toString() ?? 'N/A',
-                  Icons.calendar_today,
-                  compact: true,
-                ),
-                _buildDetailItem(
-                  'Vehicle Kind',
-                  vehicle['plate_1_vehicle_kind']?.toString() ?? 'N/A',
-                  Icons.directions_car,
-                  compact: true,
-                ),
-              ]),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        // Trailer Information
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.orange[50],
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.orange[200]!),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.rv_hookup, color: Colors.orange[700], size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Trailer',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange[700],
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildLicensePlate(
-                category: vehicle['plate_2_category']?.toString() ?? '',
-                plateNumber: vehicle['PlateNo2']?.toString() ?? 'N/A',
-                color: vehicle['plate_2_color']?.toString() ?? 'white',
-                title: 'Trailer Plate',
-                compact: true,
-              ),
-              const SizedBox(height: 8),
-              _buildVehicleDetailsGrid([
-                _buildDetailItem(
-                  'Model Year',
-                  vehicle['plate_2_model_year']?.toString() ?? 'N/A',
-                  Icons.calendar_today,
-                  compact: true,
-                ),
-                _buildDetailItem(
-                  'Vehicle Kind',
-                  vehicle['plate_2_vehicle_kind']?.toString() ?? 'N/A',
-                  Icons.directions_car,
-                  compact: true,
-                ),
-              ]),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExpirySection({
-    required String expiryDate,
-    required String title,
-  }) {
+  Widget _buildSingleVehicleDetails(Map<String, dynamic> vehicle) {
+    final expiryDate = vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A';
     final isExpired = _isDateExpired(expiryDate);
     final isExpiringSoon = _isExpiringSoon(expiryDate);
-    final daysLeft = _getDaysLeft(expiryDate);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isExpired || isExpiringSoon ? Colors.red[50] : Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color:
-              isExpired || isExpiringSoon
-                  ? Colors.red[300]!
-                  : Colors.green[300]!,
-          width: 2,
+    return Column(
+      children: [
+        _buildDetailRow(
+          'Vehicle Kind',
+          vehicle['plate_1_vehicle_kind']?.toString() ?? 'N/A',
+          Icons.directions_car,
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color:
-                  isExpired || isExpiringSoon
-                      ? Colors.red[100]
-                      : Colors.green[100],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isExpired
-                  ? Icons.error
-                  : isExpiringSoon
-                  ? Icons.warning
-                  : Icons.check_circle,
-              color:
-                  isExpired || isExpiringSoon
-                      ? Colors.red[600]
-                      : Colors.green[600],
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isExpired ? 'Expired:' : 'Expires On:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      formatDate(expiryDate),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            isExpired || isExpiringSoon
-                                ? Colors.red[700]
-                                : Colors.green[700],
-                      ),
-                    ),
-                    if (daysLeft.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              isExpired || isExpiringSoon
-                                  ? Colors.red[100]
-                                  : Colors.green[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          daysLeft,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                isExpired || isExpiringSoon
-                                    ? Colors.red[700]
-                                    : Colors.green[700],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
+        const Divider(height: 24),
+        _buildDetailRow(
+          'Model Year',
+          vehicle['plate_1_model_year']?.toString() ?? 'N/A',
+          Icons.calendar_today,
+        ),
+        const Divider(height: 24),
+        _buildDetailRow(
+          'Chassis Number',
+          vehicle['Plate1ChassisNumber']?.toString() ?? 'N/A',
+          Icons.confirmation_number,
+        ),
+        const Divider(height: 24),
+        _buildDetailRow(
+          'Mulkiya Expiry',
+          formatDate(expiryDate),
+          Icons.event_available,
+          valueColor:
+              isExpired || isExpiringSoon ? Colors.red[700] : Colors.green[700],
+          badge: _getDaysLeft(expiryDate),
+          badgeColor: isExpired || isExpiringSoon ? Colors.red : Colors.green,
+        ),
+        if (vehicle['project'] != null) ...[
+          const Divider(height: 24),
+          _buildDetailRow(
+            'Project',
+            vehicle['project']['Name'] ?? 'Unknown Project',
+            Icons.business,
           ),
         ],
-      ),
+      ],
     );
   }
 
-  Widget _buildTruckTrailerExpirySection({
-    required String truckExpiry,
-    required String trailerExpiry,
-  }) {
+  Widget _buildTruckTrailerDetails(Map<String, dynamic> vehicle) {
+    final truckExpiry = vehicle['Plate1MulkiyaExpiryDate']?.toString() ?? 'N/A';
+    final trailerExpiry =
+        vehicle['Plate2MulkiyaExpiryDate']?.toString() ?? 'N/A';
+
     final truckExpired = _isDateExpired(truckExpiry);
     final truckExpiringSoon = _isExpiringSoon(truckExpiry);
     final trailerExpired = _isDateExpired(trailerExpiry);
     final trailerExpiringSoon = _isExpiringSoon(trailerExpiry);
 
-    final truckDaysLeft = _getDaysLeft(truckExpiry);
-    final trailerDaysLeft = _getDaysLeft(trailerExpiry);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:
-            (truckExpired ||
-                    truckExpiringSoon ||
-                    trailerExpired ||
-                    trailerExpiringSoon)
-                ? Colors.red[50]
-                : Colors.green[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color:
-              (truckExpired ||
-                      truckExpiringSoon ||
-                      trailerExpired ||
-                      trailerExpiringSoon)
-                  ? Colors.red[300]!
-                  : Colors.green[300]!,
-          width: 2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Truck Details
+        Text(
+          'TRUCK DETAILS',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue[700],
+            letterSpacing: 0.5,
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color:
-                      (truckExpired ||
-                              truckExpiringSoon ||
-                              trailerExpired ||
-                              trailerExpiringSoon)
-                          ? Colors.red[100]
-                          : Colors.green[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  (truckExpired || trailerExpired)
-                      ? Icons.error
-                      : (truckExpiringSoon || trailerExpiringSoon)
-                      ? Icons.warning
-                      : Icons.check_circle,
-                  color:
-                      (truckExpired ||
-                              truckExpiringSoon ||
-                              trailerExpired ||
-                              trailerExpiringSoon)
-                          ? Colors.red[600]
-                          : Colors.green[600],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  'Mulkiya Expiry Dates',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
+        const SizedBox(height: 12),
+        _buildDetailRow(
+          'Vehicle Kind',
+          vehicle['plate_1_vehicle_kind']?.toString() ?? 'N/A',
+          Icons.local_shipping,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Model Year',
+          vehicle['plate_1_model_year']?.toString() ?? 'N/A',
+          Icons.calendar_today,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Chassis Number',
+          vehicle['Plate1ChassisNumber']?.toString() ?? 'N/A',
+          Icons.confirmation_number,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Mulkiya Expiry',
+          formatDate(truckExpiry),
+          Icons.event_available,
+          valueColor:
+              truckExpired || truckExpiringSoon
+                  ? Colors.red[700]
+                  : Colors.green[700],
+          badge: _getDaysLeft(truckExpiry),
+          badgeColor:
+              truckExpired || truckExpiringSoon ? Colors.red : Colors.green,
+        ),
+
+        const SizedBox(height: 24),
+
+        // Trailer Details
+        Text(
+          'TRAILER DETAILS',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.orange[700],
+            letterSpacing: 0.5,
           ),
+        ),
+        const SizedBox(height: 12),
+        _buildDetailRow(
+          'Vehicle Kind',
+          vehicle['plate_2_vehicle_kind']?.toString() ?? 'N/A',
+          Icons.rv_hookup,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Model Year',
+          vehicle['plate_2_model_year']?.toString() ?? 'N/A',
+          Icons.calendar_today,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Chassis Number',
+          vehicle['Plate2ChassisNumber']?.toString() ?? 'N/A',
+          Icons.confirmation_number,
+        ),
+        const Divider(height: 20),
+        _buildDetailRow(
+          'Mulkiya Expiry',
+          formatDate(trailerExpiry),
+          Icons.event_available,
+          valueColor:
+              trailerExpired || trailerExpiringSoon
+                  ? Colors.red[700]
+                  : Colors.green[700],
+          badge: _getDaysLeft(trailerExpiry),
+          badgeColor:
+              trailerExpired || trailerExpiringSoon ? Colors.red : Colors.green,
+        ),
 
-          const SizedBox(height: 16),
-
-          // Truck Expiry
-          _buildExpiryRowEnhanced(
-            truckExpired ? 'Truck Expired' : 'Truck Expiry',
-            truckExpiry,
-            Icons.local_shipping,
-            truckExpired || truckExpiringSoon ? Colors.red : Colors.green,
-            truckDaysLeft,
-          ),
-
-          const SizedBox(height: 12),
-
-          // Trailer Expiry
-          _buildExpiryRowEnhanced(
-            trailerExpired ? 'Trailer Expired' : 'Trailer Expiry',
-            trailerExpiry,
-            Icons.rv_hookup,
-            trailerExpired || trailerExpiringSoon ? Colors.red : Colors.green,
-            trailerDaysLeft,
+        if (vehicle['project'] != null) ...[
+          const Divider(height: 24),
+          _buildDetailRow(
+            'Project',
+            vehicle['project']['Name'] ?? 'Unknown Project',
+            Icons.business,
           ),
         ],
-      ),
+      ],
     );
   }
 
-  Widget _buildExpiryRowEnhanced(
+  Widget _buildDetailRow(
     String label,
-    String date,
-    IconData icon,
-    MaterialColor color,
-    String daysLeft,
-  ) {
+    String value,
+    IconData icon, {
+    Color? valueColor,
+    String? badge,
+    MaterialColor? badgeColor,
+  }) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: color[600], size: 18),
+        Icon(icon, size: 20, color: Colors.grey[600]),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -935,36 +674,35 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 2),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                crossAxisAlignment: WrapCrossAlignment.center,
+              const SizedBox(height: 4),
+              Row(
                 children: [
-                  Text(
-                    formatDate(date),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: color[700],
+                  Expanded(
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: valueColor ?? Colors.grey[800],
+                      ),
                     ),
                   ),
-                  if (daysLeft.isNotEmpty)
+                  if (badge != null && badge.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: color[100],
-                        borderRadius: BorderRadius.circular(8),
+                        color: badgeColor?[100] ?? Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        daysLeft,
+                        badge,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: color[700],
+                          color: badgeColor?[700] ?? Colors.grey[700],
                         ),
                       ),
                     ),
@@ -977,89 +715,79 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     );
   }
 
-  // New License Plate Widget with UAE-style design
   Widget _buildLicensePlate({
     required String category,
     required String plateNumber,
     required String color,
-    required String title,
-    bool compact = false,
-    double fixedWidth = 320, // Fixed width for the plate
+    String? label,
+    double fixedWidth = 320,
   }) {
     Color plateColor = _getPlateColor(color);
     Color textColor = _getTextColor(color);
 
     return Column(
       children: [
-        if (!compact)
+        if (label != null) ...[
           Text(
-            title,
+            label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: Colors.grey[600],
             ),
           ),
-        if (!compact) const SizedBox(height: 8),
-        Container(
-          width: fixedWidth,
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 16,
-            vertical: compact ? 8 : 12,
-          ),
-          decoration: BoxDecoration(
-            color: plateColor,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.black87, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Horizontal layout for category and plate number
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Category section (left side)
-                  if (category.isNotEmpty) ...[
+          const SizedBox(height: 8),
+        ],
+        Center(
+          child: Container(
+            width: fixedWidth,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: plateColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black87, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (category.isNotEmpty) ...[
+                      Flexible(
+                        flex: 2,
+                        child: buildResponsiveText(
+                          text: category,
+                          textColor: textColor,
+                          maxFontSize: 22,
+                          minFontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
                     Flexible(
-                      flex: 2,
+                      flex: category.isNotEmpty ? 5 : 7,
                       child: buildResponsiveText(
-                        text: category,
+                        text: plateNumber,
                         textColor: textColor,
-                        maxFontSize: compact ? 18 : 22,
-                        minFontSize: compact ? 12 : 14,
+                        maxFontSize: 26,
+                        minFontSize: 16,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
+                        letterSpacing: 2,
                       ),
                     ),
-                    SizedBox(width: compact ? 8 : 12),
                   ],
-
-                  // Plate number section (right side)
-                  Flexible(
-                    flex: category.isNotEmpty ? 5 : 7,
-                    child: buildResponsiveText(
-                      text: plateNumber,
-                      textColor: textColor,
-                      maxFontSize: compact ? 20 : 26,
-                      minFontSize: compact ? 14 : 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ],
-              ),
-
-              // UAE text (small, bottom)
-              if (!compact) ...[
+                ),
                 const SizedBox(height: 4),
                 Text(
                   'UAE',
@@ -1071,7 +799,7 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   ),
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ],
@@ -1110,148 +838,10 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     }
   }
 
-  // Widget _buildVehicleDetailsGrid(List<Widget> details) {
-  //   return Wrap(spacing: 8, runSpacing: 8, children: details);
-  // }
-
-  Widget _buildVehicleDetailsGrid(List<Widget> details) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double screenWidth = constraints.maxWidth;
-
-        // Determine how many items per row based on screen width
-        int crossAxisCount;
-        double childAspectRatio;
-
-        if (screenWidth < 400) {
-          // Small phones - 1 item per row, more height
-          crossAxisCount = 1;
-          childAspectRatio = 4.5; // Wider aspect ratio for horizontal layout
-        } else if (screenWidth < 600) {
-          // Medium phones - 2 items per row
-          crossAxisCount = 2;
-          childAspectRatio = 3.5;
-        } else if (screenWidth < 900) {
-          // Tablets - 2 items per row with better spacing
-          crossAxisCount = 2;
-          childAspectRatio = 4.0;
-        } else {
-          // Large screens - 3 items per row
-          crossAxisCount = 3;
-          childAspectRatio = 3.8;
-        }
-
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: childAspectRatio,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: details.length,
-          itemBuilder: (context, index) => details[index],
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailItem(
-    String label,
-    String value,
-    IconData icon, {
-    bool compact = false,
-  }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double availableWidth = constraints.maxWidth;
-        bool isVerySmall = availableWidth < 140;
-
-        // Dynamic sizing based on available width
-        double iconSize = isVerySmall ? 16 : (compact ? 18 : 20);
-        double labelFontSize = isVerySmall ? 10 : (compact ? 11 : 12);
-        double valueFontSize = isVerySmall ? 12 : (compact ? 13 : 14);
-        double padding = isVerySmall ? 8 : (compact ? 10 : 12);
-
-        return Container(
-          width: double.infinity, // Take full available width
-          padding: EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Row(
-            // Changed to Row for horizontal layout
-            children: [
-              // Icon section
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(icon, size: iconSize, color: Colors.grey[600]),
-              ),
-
-              const SizedBox(width: 8),
-
-              // Text content section
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Label
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: labelFontSize,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 2),
-
-                    // Value with responsive text sizing
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: valueFontSize,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   bool _isDateExpired(String dateString) {
     try {
       if (dateString == 'N/A' || dateString.isEmpty) return false;
       if (dateString.startsWith('9999')) return false;
-
       final date = DateTime.parse(dateString);
       return date.isBefore(DateTime.now());
     } catch (e) {
@@ -1263,11 +853,9 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     try {
       if (dateString == 'N/A' || dateString.isEmpty) return false;
       if (dateString.startsWith('9999')) return false;
-
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final thirtyDaysFromNow = now.add(const Duration(days: 30));
-
       return date.isAfter(now) && date.isBefore(thirtyDaysFromNow);
     } catch (e) {
       return false;
@@ -1278,19 +866,18 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
     try {
       if (dateString == 'N/A' || dateString.isEmpty) return '';
       if (dateString.startsWith('9999')) return '';
-
       final expiryDate = DateTime.parse(dateString);
       final today = DateTime.now();
       final difference = expiryDate.difference(today).inDays;
 
       if (difference < 0) {
-        return '(${difference.abs()} days ago)';
+        return '${difference.abs()} days ago';
       } else if (difference == 0) {
-        return '(Today)';
+        return 'Today';
       } else if (difference == 1) {
-        return '(1 day left)';
+        return '1 day left';
       } else {
-        return '($difference days left)';
+        return '$difference days left';
       }
     } catch (e) {
       return '';
@@ -1317,7 +904,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Handle bar
                 Container(
                   margin: const EdgeInsets.only(top: 8),
                   width: 40,
@@ -1327,8 +913,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-
-                // Header
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Row(
@@ -1354,8 +938,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                     ],
                   ),
                 ),
-
-                // Filter options
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -1413,8 +995,6 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                     );
                   },
                 ),
-
-                // Bottom padding
                 const SizedBox(height: 20),
               ],
             ),
