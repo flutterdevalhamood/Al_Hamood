@@ -143,6 +143,12 @@ class _TyreReplacementListScreenState extends State<TyreReplacementListScreen> {
     }
   }
 
+  void _navigateToReportsScreen() {
+    NavigationService().pushNavigation(
+      Screenroutes.tyreReplacementReportScreen,
+    );
+  }
+
   Future<void> _onRefresh() async {
     await _tyreReplacementController.refreshData();
   }
@@ -159,7 +165,15 @@ class _TyreReplacementListScreenState extends State<TyreReplacementListScreen> {
         backgroundColor: darkBlue,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.summarize),
+            tooltip: 'Reports',
+            onPressed: _navigateToReportsScreen,
+          ),
+        ],
       ),
+
       body: Consumer<TyreReplacementController>(
         builder: (context, controller, child) {
           // Filter data based on search query

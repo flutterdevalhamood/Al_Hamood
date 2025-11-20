@@ -57,6 +57,8 @@ dependencies:
   http_parser: ^4.1.2
   flutter_launcher_icons: ^0.14.4
   flutter_native_splash: ^2.4.6
+  flutter_pdfview: ^1.4.0+1
+  share_plus: ^7.2.1
 
 
 

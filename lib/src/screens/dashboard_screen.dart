@@ -137,7 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Manage your tire services and maintenance easily',
+                      'Manage your tyre services and maintenance easily',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.8),
                         fontSize: 16,
@@ -166,8 +166,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       childAspectRatio: 0.8,
                       children: [
                         _buildQuickActionCard(
-                          'Tire Replacement',
-                          'Replace worn tires',
+                          'Tyre Replacement',
+                          'Replace worn tyres',
                           Icons.refresh,
                           () {
                             NavigationService().pushNavigation(
@@ -177,7 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         _buildQuickActionCard(
                           'Swap Tyre',
-                          'Rotate tire positions',
+                          'Rotate tyre positions',
                           Icons.swap_horiz,
                           () {
                             NavigationService().pushNavigation(
@@ -187,7 +187,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         _buildQuickActionCard(
                           'Company Vehicles',
-                          'Manage fleet tires',
+                          'Manage fleet tyres',
                           Icons.directions_car,
                           () {
                             NavigationService().pushNavigation(

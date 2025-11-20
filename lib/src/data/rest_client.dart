@@ -159,4 +159,12 @@ abstract class RestClient {
     @Path("limit") int limit,
     @Header("Authorization") String? token,
   );
+
+  @POST('/api/TyreReplacementReport')
+  Future<dynamic> postTyreREplacementReport({
+    @Header("Authorization") String? token,
+    @Field("fromDate") String? fromDate,
+    @Field("toDate") String? toDate,
+    @Field("vehicle") String? vehicleId,
+  });
 }

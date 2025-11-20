@@ -24,6 +24,8 @@ class CompanyVehicleController with ChangeNotifier {
   int get totalCount => companyVehicleOriginalData?.length ?? 0;
   bool get isFiltered => _searchQuery.isNotEmpty;
 
+  String? tyreReplacementReportUrl;
+
   Future<bool> _checkToken() async {
     final token = AuthRepo.token;
 
@@ -155,6 +157,55 @@ class CompanyVehicleController with ChangeNotifier {
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<bool> postCompanyVehicleReports(
+    String? fromDate,
+    String? toDate,
+    String? vehicleId,
+  ) async {
+    if (!await _checkToken()) return false;
+
+    try {
+      final tyreReplacementReportsData = await restApi
+          .postTyreREplacementReport(
+            token: _getAuthHeader(),
+            fromDate: fromDate,
+            toDate: toDate,
+            vehicleId: vehicleId,
+          );
+
+      if (tyreReplacementReportsData['IsSuccess'] == true) {
+        final data = tyreReplacementReportsData['Data'];
+
+        if (data is String && data.isNotEmpty) {
+          tyreReplacementReportUrl = data;
+        } else if (data is Map && data.containsKey('url')) {
+          tyreReplacementReportUrl = data['url']?.toString();
+        } else {
+          errorMessage = 'No report URL received from server';
+          return false;
+        }
+
+        // Validate that we got a valid URL
+        if (tyreReplacementReportUrl == null ||
+            tyreReplacementReportUrl!.isEmpty) {
+          errorMessage = 'Invalid report URL received';
+          return false;
+        }
+
+        notifyListeners();
+        return true;
+      } else {
+        errorMessage =
+            tyreReplacementReportsData['Message'] ??
+            'Failed to generate report';
+        return false;
+      }
+    } catch (e) {
+      errorMessage = 'An error occurred while generating the report';
+      return _handleApiError(e);
     }
   }
 

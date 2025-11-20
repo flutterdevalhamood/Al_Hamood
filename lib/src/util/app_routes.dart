@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sample/src/screens/change_password_screen.dart';
+import 'package:sample/src/screens/reports/tyre_replacement_report_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_data_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_list_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_data_screen.dart';
@@ -37,6 +38,8 @@ class Screenroutes {
       "swapTyrePictureUploadScreen";
 
   static const String companyVehicleScreen = "companyVehicleScreen";
+  static const String tyreReplacementReportScreen =
+      "tyreReplacementReportsScreen";
 
   static Route<dynamic>? routes(RouteSettings settings) {
     StringConstants.currentRoute = settings.name ?? "";
@@ -122,6 +125,16 @@ class Screenroutes {
           settings: RouteSettings(name: Screenroutes.companyVehicleScreen),
           builder: (BuildContext context) {
             return CompanyVehicleScreen();
+          },
+        );
+
+      case Screenroutes.tyreReplacementReportScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(
+            name: Screenroutes.tyreReplacementReportScreen,
+          ),
+          builder: (BuildContext context) {
+            return TyreReplacementReportScreen();
           },
         );
     }
