@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sample/src/screens/change_password_screen.dart';
+import 'package:sample/src/screens/reports/companyVehicle/vehicle_assignment_screen.dart';
 import 'package:sample/src/screens/reports/tyre_replacement_report_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_data_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_list_screen.dart';
@@ -8,9 +9,9 @@ import 'package:sample/src/screens/tyreReplacement/tyre_replacement_list_screen.
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_picture_upload_screen.dart';
 
 import '../constants/string_constants.dart';
-import '../screens/company_vehicle_screen.dart';
 import '../screens/dashboard_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/reports/companyVehicle/company_vehicle_screen.dart';
 
 class Screenroutes {
   static final RouteObserver<PageRoute> routeobserver =
@@ -40,6 +41,7 @@ class Screenroutes {
   static const String companyVehicleScreen = "companyVehicleScreen";
   static const String tyreReplacementReportScreen =
       "tyreReplacementReportsScreen";
+  static const String vehicleAssignmentScreen = "vehicleAssignmentScreen";
 
   static Route<dynamic>? routes(RouteSettings settings) {
     StringConstants.currentRoute = settings.name ?? "";
@@ -135,6 +137,21 @@ class Screenroutes {
           ),
           builder: (BuildContext context) {
             return TyreReplacementReportScreen();
+          },
+        );
+
+      case Screenroutes.vehicleAssignmentScreen:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          settings: const RouteSettings(
+            name: Screenroutes.vehicleAssignmentScreen,
+          ),
+          builder: (BuildContext context) {
+            return VehicleAssignmentScreen(
+              vehicleId: args['vehicleId'],
+              vehicleName: args['vehicleName'],
+              plateNumber: args['plateNumber'],
+            );
           },
         );
     }

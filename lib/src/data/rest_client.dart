@@ -167,4 +167,18 @@ abstract class RestClient {
     @Field("toDate") String? toDate,
     @Field("vehicle") String? vehicleId,
   });
+
+  @GET('/api/getCompanyVehicleAssignmentBaseList')
+  Future<dynamic> getCompanyVehicleAssignmentBaseList({
+    @Header("Authorization") String? token,
+  });
+
+  @POST('/api/AssignCompanyVehicle')
+  Future<dynamic> postAssignCompanyVehicle({
+    @Header("Authorization") String? token,
+    @Field("company_vehicle_id") int? companyVehicleId,
+    @Field("assigned_at") String? assignedAt,
+    @Field("remarks") String? remarks,
+    @Field("company_id") int? companyId,
+  });
 }

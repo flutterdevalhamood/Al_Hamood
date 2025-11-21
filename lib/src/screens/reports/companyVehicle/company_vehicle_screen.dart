@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/providers/company_vehicle_controller.dart';
 import 'package:sample/src/util/app_colors.dart';
+import 'package:sample/src/util/app_routes.dart';
 import 'package:sample/src/widgets/date_format.dart';
 import 'package:sample/src/widgets/number_plate_responsive_text.dart';
 
@@ -484,6 +485,50 @@ class _CompanyVehicleScreenState extends State<CompanyVehicleScreen> {
                   else
                     _buildTruckTrailerDetails(vehicle),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ASSIGN BUTTON
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Get vehicle display name based on type
+                  String vehicleName =
+                      vehicleType == '1'
+                          ? 'Truck + Trailer'
+                          : vehicle['plate_1_vehicle_kind']?.toString() ??
+                              'Vehicle';
+
+                  String plateNumber = vehicle['PlateNo1']?.toString() ?? 'N/A';
+
+                  Navigator.pushNamed(
+                    context,
+                    Screenroutes.vehicleAssignmentScreen,
+                    arguments: {
+                      'vehicleId': vehicle['id'],
+                      'vehicleName': vehicleName,
+                      'plateNumber': plateNumber,
+                      'activeAssignment': vehicle['active_assignment_company'],
+                    },
+                  );
+                },
+                icon: const Icon(Icons.assignment, size: 18),
+                label: const Text(
+                  'Assign Vehicle',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Appcolors.darkBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 1,
+                ),
               ),
             ),
           ],
