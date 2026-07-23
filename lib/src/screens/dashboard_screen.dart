@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sample/src/repo/auth_repo.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
 import 'package:sample/src/widgets/drawer_widget.dart';
@@ -16,11 +15,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color primaryColor = Color(0xFFE94560);
   static const Color darkBlue = Color(0xFF1A1A2E);
   static const Color mediumBlue = Color(0xFF16213E);
-
-  // Read role directly from AuthRepo (set at login time) instead of
-  // relying on navigation arguments, which may not be passed through
-  // depending on how NavigationService is implemented.
-  String get _role => (AuthRepo.role ?? '').trim().toLowerCase();
 
   Future<bool> _onWillPop() async {
     bool? shouldLogout = await showDialog(
@@ -177,8 +171,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildQuickActionsGrid() {
-    final role = _role;
-
     // Define all possible actions along with the role(s) allowed to see them.
     final List<_QuickAction> allActions = [
       _QuickAction(

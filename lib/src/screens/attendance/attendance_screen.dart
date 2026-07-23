@@ -77,27 +77,42 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<Position> _getPositionWithFallback() async {
+    // Show a stale-but-instant fix right away if we have one — avoids the
+    // screen sitting on "Fetching location…" for the entire duration of a
+    // slow/failed GPS acquisition indoors or with weak signal.
+    final lastKnown = await Geolocator.getLastKnownPosition();
+    if (lastKnown != null && mounted) {
+      setState(() => _currentPosition = lastKnown);
+    }
+
     try {
+      // Low accuracy first — locks on much faster (network/cell based)
+      // than 'medium'/'high', which wait for a GPS satellite fix.
       return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 15),
-      );
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 8),
+        ),
+      ).timeout(const Duration(seconds: 9));
     } on TimeoutException {
       try {
         return await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low,
-          timeLimit: const Duration(seconds: 10),
-        );
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 10),
+          ),
+        ).timeout(const Duration(seconds: 11));
       } on TimeoutException {
-        // Still nothing fresh — fall back to the last known fix, if any.
-        final last = await Geolocator.getLastKnownPosition();
-        if (last != null) return last;
+        if (lastKnown != null) return lastKnown;
         rethrow;
       }
+    } catch (_) {
+      // Any other platform error (e.g. plugin channel hiccup) — still
+      // fall back to last known rather than hanging indefinitely.
+      if (lastKnown != null) return lastKnown;
+      rethrow;
     }
   }
-
-  // ---------------- Location ----------------
 
   Future<void> _fetchLocation() async {
     setState(() {
@@ -107,7 +122,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        throw Exception('Location services are turned off.');
+        setState(() => _isLoadingLocation = false);
+        if (!mounted) return;
+        await _showEnableLocationDialog();
+        return;
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
@@ -123,7 +141,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       }
 
-      final position = await _getPositionWithFallback();
+      // Hard overall cap: even if every internal fallback misbehaves,
+      // the UI is guaranteed to stop spinning after 20s total.
+      final position = await _getPositionWithFallback().timeout(
+        const Duration(seconds: 20),
+      );
       setState(() {
         _currentPosition = position;
         _isLoadingLocation = false;
@@ -133,12 +155,68 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         lat: position.latitude,
         lng: position.longitude,
       );
+    } on TimeoutException {
+      setState(() {
+        _isLoadingLocation = false;
+        _locationError =
+            _currentPosition == null
+                ? 'Could not get a location fix. Move to an open area and retry.'
+                : null;
+      });
     } catch (e) {
       setState(() {
         _locationError = e.toString().replaceFirst('Exception: ', '');
         _isLoadingLocation = false;
       });
     }
+  }
+
+  Future<void> _showEnableLocationDialog() async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Turn on location'),
+            content: const Text(
+              'This app needs your device location to mark attendance. '
+              'Please enable location services to continue.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  setState(() {
+                    _locationError = 'Location services are turned off.';
+                  });
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentBlue,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  await Geolocator.openLocationSettings();
+                  // User may flip the toggle and come straight back —
+                  // re-check once they return to the app.
+                  if (!mounted) return;
+                  _fetchLocation();
+                },
+                child: const Text('Enable'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   // ---------------- Photo ----------------
