@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:sample/src/constants/api_constants.dart';
 import 'package:sample/src/models/user_model.dart';
@@ -7,6 +8,19 @@ part 'rest_client.g.dart';
 
 var dio = Dio();
 var restApi = RestClient(dio, baseUrl: apiEndPoint);
+
+void setupDioInterceptors() {
+  dio.interceptors.add(
+    LogInterceptor(
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: false,
+      responseBody: true,
+      error: true,
+      logPrint: (obj) => debugPrint(obj.toString()),
+    ),
+  );
+}
 
 @RestApi(baseUrl: apiEndPoint)
 abstract class RestClient {
@@ -45,6 +59,7 @@ abstract class RestClient {
   });
 
   @POST('/api/TyreReplacement')
+  @MultiPart()
   Future<dynamic> postTyreReplacement({
     @Header("Authorization") String? token,
     @Part(name: "company_vehicle_id") int? companyVehicleId,
@@ -77,6 +92,7 @@ abstract class RestClient {
   });
 
   @POST('/api/TyreReplacementPictureUpload')
+  @MultiPart()
   Future<dynamic> postTyreReplacementPictureUpload({
     @Header("Authorization") String? token,
     @Part(name: "id") int? id,
@@ -103,6 +119,7 @@ abstract class RestClient {
   });
 
   @POST('/api/SwapTyre')
+  @MultiPart()
   Future<dynamic> postSwapTyre({
     @Header("Authorization") String? token,
     @Part(name: "from_company_vehicle_id") int? fromCompanyVehicleId,
@@ -141,6 +158,7 @@ abstract class RestClient {
   });
 
   @POST('/api/SwapTyrePictureUpload')
+  @MultiPart()
   Future<dynamic> postSwapTyrePictureUpload({
     @Header("Authorization") String? token,
     @Part(name: "id") int? id,
@@ -180,5 +198,48 @@ abstract class RestClient {
     @Field("assigned_at") String? assignedAt,
     @Field("remarks") String? remarks,
     @Field("company_id") int? companyId,
+  });
+
+  @GET('/api/getSalesDataBaseList')
+  Future<dynamic> getSalesDataBaseList({
+    @Header("Authorization") String? token,
+  });
+
+  @GET('/api//Sales/paginate/{page}/{limit}')
+  Future<dynamic> getSalesData(
+    @Path("page") int page,
+    @Path("limit") int limit,
+    @Header("Authorization") String? token,
+  );
+
+  @POST('/api/Sales')
+  Future<dynamic> postSalesData({
+    @Header("Authorization") String? token,
+    @Body() Map<String, dynamic>? body,
+  });
+
+  @POST('/api/Attendance/checkIn')
+  @MultiPart()
+  Future<dynamic> postEmployeeAttendance({
+    @Header("Authorization") String? token,
+    @Part(name: "latitude") double? latitude,
+    @Part(name: "longitude") double? longitude,
+    @Part(name: "employee_id") int? employeeId,
+    @Part(name: "image") required List<MultipartFile> image,
+  });
+
+  @GET('/api/Attendance/GetBaseList')
+  Future<dynamic> getAttendanceDataBaseList({
+    @Header("Authorization") String? token,
+  });
+
+  @POST('/api/Attendance/checkOut')
+  @MultiPart()
+  Future<dynamic> postEmployeeAttendanceCheckOut({
+    @Header("Authorization") String? token,
+    @Part(name: "latitude") double? latitude,
+    @Part(name: "longitude") double? longitude,
+    @Part(name: "employee_id") int? employeeId,
+    @Part(name: "image") required List<MultipartFile> image,
   });
 }

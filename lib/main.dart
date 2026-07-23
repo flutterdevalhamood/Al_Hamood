@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sample/src/BaseScreen.dart';
+import 'package:sample/src/providers/attendance_controller.dart';
 import 'package:sample/src/providers/company_vehicle_controller.dart';
 import 'package:sample/src/providers/login_controller.dart';
+import 'package:sample/src/providers/post_sale_controller.dart';
+import 'package:sample/src/providers/sales_controller.dart';
 import 'package:sample/src/providers/swap_tyre_controller.dart';
 import 'package:sample/src/providers/tyre_replacement_controller.dart';
 import 'package:sample/src/util/shared_pref.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'src/data/rest_client.dart';
 import 'src/repo/auth_repo.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
@@ -18,6 +22,7 @@ void main() async {
 
   await AuthRepo.initAuth();
   prefs = await SharedPreferences.getInstance();
+  setupDioInterceptors();
   runApp(
     MultiProvider(
       providers: [
@@ -28,6 +33,9 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (context) => SwapTyreController()),
         ChangeNotifierProvider(create: (context) => CompanyVehicleController()),
+        ChangeNotifierProvider(create: (context) => SalesController()),
+        ChangeNotifierProvider(create: (context) => PostSaleController()),
+        ChangeNotifierProvider(create: (context) => AttendanceController()),
       ],
       child: const BaseScreen(),
     ),

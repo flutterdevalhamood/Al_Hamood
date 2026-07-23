@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample/src/repo/auth_repo.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
 import 'package:sample/src/widgets/drawer_widget.dart';
@@ -15,6 +16,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color primaryColor = Color(0xFFE94560);
   static const Color darkBlue = Color(0xFF1A1A2E);
   static const Color mediumBlue = Color(0xFF16213E);
+
+  // Read role directly from AuthRepo (set at login time) instead of
+  // relying on navigation arguments, which may not be passed through
+  // depending on how NavigationService is implemented.
+  String get _role => (AuthRepo.role ?? '').trim().toLowerCase();
 
   Future<bool> _onWillPop() async {
     bool? shouldLogout = await showDialog(
@@ -156,47 +162,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Quick Actions Grid - 2x2 layout
-                    GridView.count(
-                      crossAxisCount: 2,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.8,
-                      children: [
-                        _buildQuickActionCard(
-                          'Tyre Replacement',
-                          'Replace worn tyres',
-                          Icons.refresh,
-                          () {
-                            NavigationService().pushNavigation(
-                              Screenroutes.tyreReplacementListScreen,
-                            );
-                          },
-                        ),
-                        _buildQuickActionCard(
-                          'Swap Tyre',
-                          'Rotate tyre positions',
-                          Icons.swap_horiz,
-                          () {
-                            NavigationService().pushNavigation(
-                              Screenroutes.swapTyreListScreen,
-                            );
-                          },
-                        ),
-                        _buildQuickActionCard(
-                          'Company Vehicles',
-                          'Manage fleet tyres',
-                          Icons.directions_car,
-                          () {
-                            NavigationService().pushNavigation(
-                              Screenroutes.companyVehicleScreen,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
+                    // Quick Actions Grid - filtered by role
+                    _buildQuickActionsGrid(),
                   ],
                 ),
               ),
@@ -206,6 +173,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildQuickActionsGrid() {
+    final role = _role;
+
+    // Define all possible actions along with the role(s) allowed to see them.
+    final List<_QuickAction> allActions = [
+      _QuickAction(
+        title: 'Attendance',
+        subtitle: 'Mark your attendance here',
+        icon: Icons.fingerprint,
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.attendanceScreen);
+        },
+      ),
+      _QuickAction(
+        title: 'Tyre Replacement',
+        subtitle: 'Replace worn tyres',
+        icon: Icons.refresh,
+        onTap: () {
+          NavigationService().pushNavigation(
+            Screenroutes.tyreReplacementListScreen,
+          );
+        },
+      ),
+      _QuickAction(
+        title: 'Swap Tyre',
+        subtitle: 'Rotate tyre positions',
+        icon: Icons.swap_horiz,
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.swapTyreListScreen);
+        },
+      ),
+      _QuickAction(
+        title: 'Company Vehicles',
+        subtitle: 'Manage fleet tyres',
+        icon: Icons.directions_car,
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.companyVehicleScreen);
+        },
+      ),
+      _QuickAction(
+        title: 'Sales',
+        subtitle: 'Manage Sales Data',
+        icon: Icons.point_of_sale_sharp,
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.salesListScreen);
+        },
+      ),
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 0.8,
+      children:
+          allActions
+              .map(
+                (action) => _buildQuickActionCard(
+                  action.title,
+                  action.subtitle,
+                  action.icon,
+                  action.onTap,
+                ),
+              )
+              .toList(),
     );
   }
 
@@ -260,4 +297,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+}
+
+class _QuickAction {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  _QuickAction({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
 }

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+3
+version: 1.0.3+9
 
 environment:
   sdk: ^3.7.0
@@ -42,14 +42,14 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.0.17
   dio: ^5.0.0
-  retrofit: ^4.0.0
+  retrofit: ^4.9.2
   url_launcher: ^6.3.1
   flutter_riverpod: ^2.6.1
   form_field_validator: ^1.1.0
   json_annotation: ^4.9.0
   freezed_annotation: ^3.0.0
   freezed: ^3.0.3
-  retrofit_generator: ^9.2.0
+  retrofit_generator: ^10.2.0
   cached_network_image: ^3.4.1
   flutter_image_compress: ^2.4.0
   permission_handler: ^12.0.0+1
@@ -59,6 +59,7 @@ dependencies:
   flutter_native_splash: ^2.4.6
   flutter_pdfview: ^1.4.0+1
   share_plus: ^7.2.1
+  geolocator: ^14.0.2
 
 
 
@@ -73,7 +74,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   json_serializable: ^6.9.4
-  build_runner: ^2.0.0
+  build_runner: ^2.6.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

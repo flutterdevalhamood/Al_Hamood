@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sample/src/models/sale_model.dart';
+import 'package:sample/src/screens/attendance/attendance_screen.dart';
 import 'package:sample/src/screens/change_password_screen.dart';
 import 'package:sample/src/screens/reports/companyVehicle/vehicle_assignment_screen.dart';
 import 'package:sample/src/screens/reports/tyre_replacement_report_screen.dart';
+import 'package:sample/src/screens/sales/post_sale_screen.dart';
+import 'package:sample/src/screens/sales/sale_detail_screen.dart';
+import 'package:sample/src/screens/sales/sales_list_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_data_screen.dart';
 import 'package:sample/src/screens/swapTyre/swap_tyre_list_screen.dart';
 import 'package:sample/src/screens/tyreReplacement/tyre_replacement_data_screen.dart';
@@ -42,6 +47,13 @@ class Screenroutes {
   static const String tyreReplacementReportScreen =
       "tyreReplacementReportsScreen";
   static const String vehicleAssignmentScreen = "vehicleAssignmentScreen";
+
+  //swap tyre
+  static const String salesListScreen = "salesListScreen";
+  static const String salesDetailScreen = "salesDetailScreen";
+  static const String salesDataScreen = "salesDataScreen";
+
+  static const String attendanceScreen = "attendanceScreen";
 
   static Route<dynamic>? routes(RouteSettings settings) {
     StringConstants.currentRoute = settings.name ?? "";
@@ -152,6 +164,38 @@ class Screenroutes {
               vehicleName: args['vehicleName'],
               plateNumber: args['plateNumber'],
             );
+          },
+        );
+
+      case Screenroutes.salesListScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.salesListScreen),
+          builder: (BuildContext context) {
+            return SalesListScreen();
+          },
+        );
+
+      case Screenroutes.salesDetailScreen:
+        final sale = settings.arguments as Sale;
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.salesDetailScreen),
+          builder: (BuildContext context) {
+            return SaleDetailScreen(sale: sale);
+          },
+        );
+      case Screenroutes.salesDataScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.salesDataScreen),
+          builder: (BuildContext context) {
+            return PostSaleScreen();
+          },
+        );
+
+      case Screenroutes.attendanceScreen:
+        return MaterialPageRoute(
+          settings: const RouteSettings(name: Screenroutes.attendanceScreen),
+          builder: (BuildContext context) {
+            return AttendanceScreen();
           },
         );
     }

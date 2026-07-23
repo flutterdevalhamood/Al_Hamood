@@ -27,6 +27,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
   UserData? _currentUser;
   final bool _isLoading = true;
 
+  // Read role directly from AuthRepo (persisted in SharedPreferences at login)
+  String get _role => (AuthRepo.role ?? '').trim().toLowerCase();
+
   @override
   void initState() {
     super.initState();
@@ -313,49 +316,9 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   ),
                 ),
 
-                // Menu Items
+                // Menu Items - filtered by role
                 const SizedBox(height: 20),
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.dashboard_rounded,
-                  title: 'Dashboard',
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.tire_repair,
-                  title: 'Tire Replacement',
-                  onTap: () {
-                    NavigationService().pushNavigation(
-                      Screenroutes.tyreReplacementListScreen,
-                    );
-                  },
-                ),
-
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.tire_repair,
-                  title: 'Swap Tyre',
-                  onTap: () {
-                    NavigationService().pushNavigation(
-                      Screenroutes.swapTyreListScreen,
-                    );
-                  },
-                ),
-
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.tire_repair,
-                  title: 'Company Vehicles',
-                  onTap: () {
-                    NavigationService().pushNavigation(
-                      Screenroutes.companyVehicleScreen,
-                    );
-                  },
-                ),
+                ..._buildMenuItems(context),
 
                 // Spacer to push logout to bottom
                 SizedBox(height: 40),
@@ -371,7 +334,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
 
                 const SizedBox(height: 16),
 
-                // Logout
+                // Logout - always visible regardless of role
                 _buildMenuItem(
                   context: context,
                   icon: Icons.logout_rounded,
@@ -388,6 +351,73 @@ class _DrawerWidgetState extends State<DrawerWidget> {
         );
       },
     );
+  }
+
+  // Builds the role-filtered list of menu item widgets (excluding Logout,
+  // which is always shown and rendered separately at the bottom).
+  List<Widget> _buildMenuItems(BuildContext context) {
+    final role = _role;
+
+    final List<_DrawerMenuAction> allItems = [
+      _DrawerMenuAction(
+        icon: Icons.dashboard_rounded,
+        title: 'Dashboard',
+        // Dashboard is available to everyone
+        roles: const ['attendance', 'superadmin'],
+        onTap: () {
+          Navigator.pop(context);
+        },
+      ),
+      _DrawerMenuAction(
+        icon: Icons.fingerprint,
+        title: 'Attendance',
+        roles: const ['attendance', 'superadmin'],
+        onTap: () {
+          Navigator.pop(context);
+          NavigationService().pushNavigation(Screenroutes.attendanceScreen);
+        },
+      ),
+      _DrawerMenuAction(
+        icon: Icons.tire_repair,
+        title: 'Tire Replacement',
+        roles: const ['superadmin'],
+        onTap: () {
+          NavigationService().pushNavigation(
+            Screenroutes.tyreReplacementListScreen,
+          );
+        },
+      ),
+      _DrawerMenuAction(
+        icon: Icons.tire_repair,
+        title: 'Swap Tyre',
+        roles: const ['superadmin'],
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.swapTyreListScreen);
+        },
+      ),
+      _DrawerMenuAction(
+        icon: Icons.tire_repair,
+        title: 'Company Vehicles',
+        roles: const ['superadmin'],
+        onTap: () {
+          NavigationService().pushNavigation(Screenroutes.companyVehicleScreen);
+        },
+      ),
+    ];
+
+    final visibleItems =
+        allItems.where((item) => item.roles.contains(role)).toList();
+
+    return visibleItems
+        .map(
+          (item) => _buildMenuItem(
+            context: context,
+            icon: item.icon,
+            title: item.title,
+            onTap: item.onTap,
+          ),
+        )
+        .toList();
   }
 
   Widget _buildMenuItem({
@@ -451,4 +481,18 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       ),
     );
   }
+}
+
+class _DrawerMenuAction {
+  final IconData icon;
+  final String title;
+  final List<String> roles;
+  final VoidCallback onTap;
+
+  _DrawerMenuAction({
+    required this.icon,
+    required this.title,
+    required this.roles,
+    required this.onTap,
+  });
 }
