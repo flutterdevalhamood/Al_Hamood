@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
+import 'package:sample/src/util/location_service.dart';
 import 'package:sample/src/widgets/drawer_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -15,6 +16,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static const Color primaryColor = Color(0xFFE94560);
   static const Color darkBlue = Color(0xFF1A1A2E);
   static const Color mediumBlue = Color(0xFF16213E);
+
+  @override
+  void initState() {
+    super.initState();
+    LocationService.instance.warmUp();
+  }
 
   Future<bool> _onWillPop() async {
     bool? shouldLogout = await showDialog(

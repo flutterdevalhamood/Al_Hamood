@@ -1,16 +1,62 @@
-/// Model for a single employee, as returned inside `Data.employees`
-/// by GET /api/Attendance/GetBaseList
+/// Employee model returned by `GET /api/Attendance/GetBaseList`.
+///
+/// Kept as its own small, immutable class instead of passing raw
+/// `Map<String, dynamic>` around everywhere. Benefits:
+///  - Screens / widgets never need to know the API's exact key casing
+///    (`Name` vs `name`, `photo` vs `Photo`) — that's isolated to
+///    [Employee.fromMap].
+///  - Adding a field later (designation, department, badge number, ...)
+///    only touches this file, not every widget that reads a raw map.
+///  - `matches()` centralizes search behaviour so the UI stays dumb.
 class Employee {
   final int id;
   final String name;
+  final String? photoUrl;
 
-  Employee({required this.id, required this.name});
+  /// `true` if this employee has already checked in today (and has not
+  /// yet checked out) per `GetBaseList`'s `status` field. Drives whether
+  /// AttendanceScreen shows "Check In" or "Check Out" for them.
+  final bool status;
 
-  factory Employee.fromJson(Map<String, dynamic> json) {
+  const Employee({
+    required this.id,
+    required this.name,
+    this.photoUrl,
+    this.status = false,
+  });
+
+  factory Employee.fromMap(Map<String, dynamic> map) {
+    final rawPhoto = map['photo'];
+    final photo =
+        (rawPhoto is String && rawPhoto.trim().isNotEmpty)
+            ? rawPhoto.trim()
+            : null;
+
+    final rawId = map['id'];
+    final id = rawId is int ? rawId : int.tryParse('$rawId') ?? -1;
+
     return Employee(
-      id: json['id'] as int,
-      name: (json['Name'] as String? ?? '').trim(),
+      id: id,
+      name:
+          (map['Name'] as String?)?.trim().isNotEmpty == true
+              ? (map['Name'] as String).trim()
+              : 'Unnamed employee',
+      photoUrl: photo,
+      status: map['status'] == true,
     );
+  }
+
+  bool get hasPhoto => photoUrl != null;
+
+  /// `true` when this employee is due to check out rather than check in.
+  bool get isCheckedIn => status;
+
+  /// Case-insensitive match on either the display name or the numeric id —
+  /// used by the picker's search field.
+  bool matches(String query) {
+    if (query.trim().isEmpty) return true;
+    final q = query.trim().toLowerCase();
+    return name.toLowerCase().contains(q) || id.toString().contains(q);
   }
 
   @override
@@ -18,38 +64,4 @@ class Employee {
 
   @override
   int get hashCode => id.hashCode;
-}
-
-/// Wraps the full GetBaseList response:
-/// { StatusCode, Message, IsSuccess, Data: { employees: [...] } }
-class BaseListResponse {
-  final int statusCode;
-  final String message;
-  final bool isSuccess;
-  final List<Employee> employees;
-
-  BaseListResponse({
-    required this.statusCode,
-    required this.message,
-    required this.isSuccess,
-    required this.employees,
-  });
-
-  /// [json] can be a Map (already decoded) or the raw dynamic body
-  /// returned by the retrofit client — handles both.
-  factory BaseListResponse.fromJson(dynamic json) {
-    final map = json as Map<String, dynamic>;
-    final data = map['Data'] as Map<String, dynamic>? ?? const {};
-    final rawList = data['employees'] as List<dynamic>? ?? const [];
-
-    return BaseListResponse(
-      statusCode: map['StatusCode'] as int? ?? 0,
-      message: map['Message'] as String? ?? '',
-      isSuccess: map['IsSuccess'] as bool? ?? false,
-      employees:
-          rawList
-              .map((e) => Employee.fromJson(e as Map<String, dynamic>))
-              .toList(),
-    );
-  }
 }

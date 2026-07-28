@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:sample/src/models/employee_model.dart';
 
 import '../data/rest_client.dart';
 import '../repo/auth_repo.dart';
@@ -9,13 +10,25 @@ class AttendanceController with ChangeNotifier {
   bool isSubmitting = false;
   String? errorMessage;
 
-  // Employee list from Attendance/GetBaseList
-  List<Map<String, dynamic>>? employeeData;
+  // Typed employee list from Attendance/GetBaseList (id, Name, photo).
+  List<Employee>? employeeData;
   int? selectedEmployeeId;
 
   // Location captured for the check-in
   double? latitude;
   double? longitude;
+
+  /// Convenience lookup so the UI can render the selected employee's photo
+  /// and name without re-deriving it from the raw list every time.
+  Employee? get selectedEmployee {
+    final id = selectedEmployeeId;
+    final list = employeeData;
+    if (id == null || list == null) return null;
+    for (final e in list) {
+      if (e.id == id) return e;
+    }
+    return null;
+  }
 
   Future<bool> _checkToken() async {
     final token = AuthRepo.token;
@@ -39,8 +52,16 @@ class AttendanceController with ChangeNotifier {
     return 'Bearer ${AuthRepo.token}';
   }
 
+  /// Select an employee by id (kept, since posting attendance only needs
+  /// the id) — use [setSelectedEmployeeObj] from the picker when you also
+  /// have the full [Employee] on hand, to avoid an extra list lookup.
   void setSelectedEmployee(int? employeeId) {
     selectedEmployeeId = employeeId;
+    notifyListeners();
+  }
+
+  void setSelectedEmployeeObj(Employee? employee) {
+    selectedEmployeeId = employee?.id;
     notifyListeners();
   }
 
@@ -91,13 +112,15 @@ class AttendanceController with ChangeNotifier {
         employeeData =
             rawList
                 .whereType<Map>()
-                .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e))
+                .map<Employee>(
+                  (e) => Employee.fromMap(Map<String, dynamic>.from(e)),
+                )
                 .toList();
 
         debugPrint('Employee base list fetched: ${employeeData?.length}');
       } else if (response is Map<String, dynamic>) {
         errorMessage =
-            response['message']?.toString() ?? 'Failed to fetch employee list';
+            response['Message']?.toString() ?? 'Failed to fetch employee list';
         debugPrint('API call failed: $errorMessage');
       } else {
         errorMessage = 'Unexpected API response format';
@@ -160,12 +183,12 @@ class AttendanceController with ChangeNotifier {
 
       // API returns e.g. {"status": true/false, "message": "..."} —
       // note the lowercase "status" key, not "IsSuccess".
-      if (response is Map<String, dynamic> && response['status'] == true) {
+      if (response is Map<String, dynamic> && response['IsSuccess'] == true) {
         debugPrint('Attendance marked successfully');
         return true;
       } else if (response is Map<String, dynamic>) {
         errorMessage =
-            response['message']?.toString() ?? 'Failed to mark attendance';
+            response['Message']?.toString() ?? 'Failed to mark attendance';
         debugPrint('API call failed: $errorMessage');
         return false;
       } else {
@@ -234,12 +257,12 @@ class AttendanceController with ChangeNotifier {
       // producing the wrong snackbar color: {"status":false,"message":
       // "You have already checked out today."} was being read as success
       // because we were checking the (absent) "IsSuccess" key instead.
-      if (response is Map<String, dynamic> && response['status'] == true) {
+      if (response is Map<String, dynamic> && response['IsSuccess'] == true) {
         debugPrint('Checked out successfully');
         return true;
       } else if (response is Map<String, dynamic>) {
         errorMessage =
-            response['message']?.toString() ?? 'Failed to mark attendance';
+            response['Message']?.toString() ?? 'Failed to mark attendance';
         debugPrint('API call failed: $errorMessage');
         return false;
       } else {
@@ -268,8 +291,8 @@ class AttendanceController with ChangeNotifier {
       }
 
       final data = e.response?.data;
-      if (data is Map<String, dynamic> && data['message'] != null) {
-        errorMessage = data['message'].toString();
+      if (data is Map<String, dynamic> && data['Message'] != null) {
+        errorMessage = data['Message'].toString();
       } else {
         errorMessage = e.message ?? 'Network error. Please try again.';
       }
