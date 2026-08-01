@@ -37,6 +37,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   bool _isCheckInLoading = false;
   bool _isCheckOutLoading = false;
 
+  bool _isCapturingPhoto = false;
+
   @override
   void initState() {
     super.initState();
@@ -132,8 +134,62 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       return;
     }
 
-    // ...existing fallback logic (permission checks, _getPositionWithFallback, etc.) stays as-is
-    // for the case where warm-up hasn't finished yet or failed.
+    // Warm-up hasn't finished (or failed) yet — fetch it ourselves here,
+    // with full service/permission checks and visible feedback.
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() => _isLoadingLocation = false);
+        if (!mounted) return;
+        await _showEnableLocationDialog();
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permission denied.');
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+          'Location permission permanently denied. Enable it in settings.',
+        );
+      }
+
+      final position = await _getPositionWithFallback().timeout(
+        const Duration(seconds: 20),
+      );
+
+      // Share it back so Dashboard/other screens benefit too.
+      LocationService.instance.cachedPosition = position;
+
+      if (!mounted) return;
+      setState(() {
+        _currentPosition = position;
+        _isLoadingLocation = false;
+      });
+      context.read<AttendanceController>().setLocation(
+        lat: position.latitude,
+        lng: position.longitude,
+      );
+    } on TimeoutException {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingLocation = false;
+        _locationError =
+            _currentPosition == null
+                ? 'Could not get a location fix. Move to an open area and retry.'
+                : null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _locationError = e.toString().replaceFirst('Exception: ', '');
+        _isLoadingLocation = false;
+      });
+    }
   }
 
   Future<void> _refreshLocationInBackground() async {
@@ -259,9 +315,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   // ---------------- Photo ----------------
 
   Future<void> _captureImage() async {
+    if (_isCapturingPhoto) return; // prevent double-tap re-entry too
+    setState(() => _isCapturingPhoto = true);
     try {
       final photo = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: ImageSource.camera,
         imageQuality: 80,
         maxWidth: 1280,
         maxHeight: 1280,
@@ -272,6 +330,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       }
     } catch (e) {
       _showSnack('Could not open camera: $e');
+    } finally {
+      if (mounted) setState(() => _isCapturingPhoto = false);
     }
   }
 
@@ -416,168 +476,129 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         _capturedImage != null &&
         !controller.isSubmitting;
 
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Employee Attendance',
-          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+    return PopScope(
+      canPop: !_isCapturingPhoto,
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          title: const Text(
+            'Employee Attendance',
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+          backgroundColor: darkBlue,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
-        backgroundColor: darkBlue,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await controller.getAttendanceBaseList();
-          await _fetchLocation();
-        },
-        color: accentBlue,
-        child: Column(
-          children: [
-            // Header: dark blue rounded panel housing the employee
-            // selector — now a photo card instead of a name-only pill.
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: darkBlue,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            await controller.getAttendanceBaseList();
+            await _fetchLocation();
+          },
+          color: accentBlue,
+          child: Column(
+            children: [
+              // Header: dark blue rounded panel housing the employee
+              // selector — now a photo card instead of a name-only pill.
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: darkBlue,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+                child: _buildEmployeeSelector(controller),
+              ),
+
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _buildLocationCard(),
+                    const SizedBox(height: 12),
+                    _buildPhotoCard(),
+                    const SizedBox(height: 24),
+                    // Exactly one action is shown at a time, driven by the
+                    // selected employee's `status` flag: Check Out if
+                    // they're already checked in today, otherwise Check In.
+                    isAlreadyCheckedIn
+                        ? SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed:
+                                canSubmit
+                                    ? () => _submitCheckout(controller)
+                                    : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accentBlue,
+                              disabledBackgroundColor: Colors.grey[400],
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            child:
+                                _isCheckOutLoading
+                                    ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Check Out',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                          ),
+                        )
+                        : SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed:
+                                canSubmit
+                                    ? () => _submitAttendance(controller)
+                                    : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: darkBlue,
+                              disabledBackgroundColor: Colors.grey[400],
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            child:
+                                _isCheckInLoading
+                                    ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Check In',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                          ),
+                        ),
+                  ],
                 ),
               ),
-              child: _buildEmployeeSelector(controller),
-            ),
-
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildLocationCard(),
-                  const SizedBox(height: 12),
-                  _buildPhotoCard(),
-                  const SizedBox(height: 24),
-                  // Only Check Out is shown once the selected employee's
-                  // `status` flag says they're already checked in today;
-                  // otherwise both actions are available as before.
-                  isAlreadyCheckedIn
-                      ? SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed:
-                              canSubmit
-                                  ? () => _submitCheckout(controller)
-                                  : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: accentBlue,
-                            disabledBackgroundColor: Colors.grey[400],
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child:
-                              _isCheckOutLoading
-                                  ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                  : const Text(
-                                    'Check Out',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                        ),
-                      )
-                      : Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed:
-                                    canSubmit
-                                        ? () => _submitAttendance(controller)
-                                        : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: darkBlue,
-                                  disabledBackgroundColor: Colors.grey[400],
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                                child:
-                                    _isCheckInLoading
-                                        ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                        : const Text(
-                                          'Check In',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: SizedBox(
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed:
-                                    canSubmit
-                                        ? () => _submitCheckout(controller)
-                                        : null,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: accentBlue,
-                                  disabledBackgroundColor: Colors.grey[400],
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                                child:
-                                    _isCheckOutLoading
-                                        ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                        : const Text(
-                                          'Check Out',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

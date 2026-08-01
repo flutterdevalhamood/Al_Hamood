@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sample/src/repo/auth_repo.dart';
 import 'package:sample/src/screens/splash_screen.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
@@ -18,13 +19,15 @@ GlobalKey<NavigatorState>? navigatorKey = GlobalKey();
 class _BaseScreenState extends State<BaseScreen> {
   @override
   Widget build(BuildContext context) {
+    final String initialRoute =
+        AuthRepo.isAuthenticated ? Screenroutes.dashboard : Screenroutes.login;
     return MaterialApp(
       home: SplashScreen(),
       scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       theme: appTheme,
       onGenerateRoute: Screenroutes.routes,
-      initialRoute: Screenroutes.login,
+      initialRoute: initialRoute,
       navigatorObservers: [Screenroutes.routeobserver],
       navigatorKey: NavigationService().navigatorKey,
     );

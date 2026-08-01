@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:sample/src/util/app_navigation.dart';
 import 'package:sample/src/util/app_routes.dart';
 import 'package:sample/src/util/location_service.dart';
@@ -11,16 +12,149 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with WidgetsBindingObserver {
   // Tire app theme colors
   static const Color primaryColor = Color(0xFFE94560);
   static const Color darkBlue = Color(0xFF1A1A2E);
   static const Color mediumBlue = Color(0xFF16213E);
 
+  bool _awaitingSettingsReturn = false;
+
   @override
   void initState() {
     super.initState();
-    LocationService.instance.warmUp();
+    WidgetsBinding.instance.addObserver(this);
+    // Wait for first frame so we have a valid context to show dialogs with.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkLocation());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // User just came back from Settings (device location / app permission).
+    if (state == AppLifecycleState.resumed && _awaitingSettingsReturn) {
+      _awaitingSettingsReturn = false;
+      _checkLocation();
+    }
+  }
+
+  Future<void> _checkLocation() async {
+    final result = await LocationService.instance.warmUp();
+    if (!mounted) return;
+
+    switch (result) {
+      case LocationWarmUpResult.serviceDisabled:
+        _showEnableLocationDialog();
+        break;
+      case LocationWarmUpResult.permissionDeniedForever:
+        _showOpenAppSettingsDialog();
+        break;
+      case LocationWarmUpResult.permissionDenied:
+        // User just tapped "Deny" on the system prompt — usually fine to
+        // stay silent here so we don't nag right after they said no.
+        break;
+      case LocationWarmUpResult.success:
+      case LocationWarmUpResult.error:
+        break;
+    }
+  }
+
+  void _showEnableLocationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            icon: Icon(Icons.location_off, color: primaryColor, size: 32),
+            title: Text(
+              'Turn on device location',
+              style: TextStyle(color: darkBlue, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'Location services are turned off. Please enable them to use '
+              'attendance and other location-based features.',
+              style: TextStyle(color: darkBlue),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+                child: const Text('Not now'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  _awaitingSettingsReturn = true;
+                  await Geolocator.openLocationSettings();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Turn On'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showOpenAppSettingsDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            icon: Icon(Icons.lock_outline, color: primaryColor, size: 32),
+            title: Text(
+              'Location permission needed',
+              style: TextStyle(color: darkBlue, fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'Location access was permanently denied. Please enable it '
+              'from app settings to continue.',
+              style: TextStyle(color: darkBlue),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  _awaitingSettingsReturn = true;
+                  await Geolocator.openAppSettings();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('App Settings'),
+              ),
+            ],
+          ),
+    );
   }
 
   Future<bool> _onWillPop() async {

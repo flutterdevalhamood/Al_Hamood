@@ -19,9 +19,9 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await AuthRepo.initAuth();
   prefs = await SharedPreferences.getInstance();
+  await AuthRepo.initAuth();
+
   setupDioInterceptors();
   runApp(
     MultiProvider(
